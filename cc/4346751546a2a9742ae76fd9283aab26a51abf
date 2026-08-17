@@ -1,0 +1,36 @@
+service-tray-ng.csproj
+  s_a43e88b00031c5::t_9d127e403fc529 10-12,20-26
+  s_a43e88b00031c5::t_ddea366dd3d63c 27
+ConfigStore.cs
+  s_a43e88b00031c5::t_4811891ed746ed 9
+Edition.cs
+  s_a43e88b00031c5::t_48bc7c36c4aef2 1-29
+ServiceProfile.cs
+  s_a43e88b00031c5::t_2c59a2a9029a9d 55-62
+README.md
+  s_a43e88b00031c5::t_24c04e427ea929 28-30
+  s_a43e88b00031c5::t_97a78266cc85ac 65-69,71-78,81-82
+TrayApplicationContext.cs
+  s_a43e88b00031c5::t_9e5777ca15505d 257,269,273
+  s_a43e88b00031c5::t_60e99abb178ef9 43
+  s_a43e88b00031c5::t_8131d231b4f0aa 25
+  s_a43e88b00031c5::t_3b0b624cc6d4de 127
+  s_a43e88b00031c5::t_cf179f97773885 212-215
+  s_a43e88b00031c5::t_d619ca91ca68a1 79-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "cc4346751546a2a9742ae76fd9283aab26a51abf",
+  "prompts": {},
+  "sessions": {
+    "s_a43e88b00031c5": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ff2af203dfferbRmCEwtsyna0D",
+        "model": "unknown"
+      },
+      "human_author": "zt11822 <zt11822@eminxing.com>"
+    }
+  }
+}
