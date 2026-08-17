@@ -1,0 +1,46 @@
+tests/service-tray-ng.Tests/ConfigStoreTests.cs
+  s_9e5166974c7618::t_62e39c7e5b3709 1-4,6-42,44-46,48-90
+  s_9e5166974c7618::t_bb2ffff5b558b1 5
+  s_9e5166974c7618::t_b913d31ff1e384 43,47
+ConfigStore.cs
+  s_9e5166974c7618::t_7b8b5816a6a4e3 11-14,18-22,26,28,66-71,73,76
+tests/service-tray-ng.Tests/AssemblyInfo.cs
+  s_9e5166974c7618::t_7890616ea6ca5b 1-3
+tests/service-tray-ng.Tests/service-tray-ng.Tests.csproj
+  s_9e5166974c7618::t_3929a21fb048c9 4-21,23,25
+  s_9e5166974c7618::t_03b87a6184f9f0 1-3,22,24,26-27
+tests/service-tray-ng.Tests/ManagedServiceResolveCommandTests.cs
+  s_9e5166974c7618::t_9fa0e3d404db15 1-120
+tests/service-tray-ng.Tests/ManagedServiceLifecycleTests.cs
+  s_9e5166974c7618::t_ae303f0faea4b8 1-111
+service-tray-ng.csproj
+  s_9e5166974c7618::t_d20234ed7a2ced 18,30-33
+  s_9e5166974c7618::t_9d6479ce92e03f 19-22
+README.md
+  s_9e5166974c7618::t_0bf7dfc19af947 68-75
+ManagedService.cs
+  s_9e5166974c7618::t_73787881ed393e 99,106
+  s_9e5166974c7618::t_afd1a0d9f3464e 68
+  s_9e5166974c7618::t_5d0460b944e885 134
+  s_9e5166974c7618::t_2ce030f93bf258 119
+  s_9e5166974c7618::t_83b8d633f942b8 144
+  s_9e5166974c7618::t_f63611fcbc816b 202
+tests/service-tray-ng.Tests/ServiceProfileTests.cs
+  s_9e5166974c7618::t_77dba6bd6ea6a0 1-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "bb88ebca2a7341c824558cd44889e0ced516d7fc",
+  "prompts": {},
+  "sessions": {
+    "s_9e5166974c7618": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ff1b76ea6ffe3vIkV1BtetFVzR",
+        "model": "unknown"
+      },
+      "human_author": "zt11822 <zt11822@eminxing.com>"
+    }
+  }
+}
