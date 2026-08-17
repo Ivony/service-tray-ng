@@ -16,10 +16,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="tests\**\*.cs" />
+    <None Remove="tests\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Assets\opencode-logo-light.png" />
     <EmbeddedResource Include="Assets\opencode-logo-dark.png" />
     <EmbeddedResource Include="Assets\dsh-logo-light.png" />
     <EmbeddedResource Include="Assets\dsh-logo-dark.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="service-tray-ng.Tests" />
   </ItemGroup>
 
 </Project>

@@ -65,6 +65,14 @@ dotnet publish -c Release -r win-x64
 
 Single-file exe at `bin/Release/net8.0-windows/win-x64/publish/`.
 
+## Tests
+
+```powershell
+dotnet test
+```
+
+xUnit tests cover command resolution, port probing/switching, config load/fallback/persistence, profile defaults, and a real start/stop/restart lifecycle against a local node server.
+
 ## Adding a service
 
 Add a `ServiceProfile` in `ServiceProfile.cs` (command names, `npx` package, args template, default port, logos) and drop the icons into `Assets/`.

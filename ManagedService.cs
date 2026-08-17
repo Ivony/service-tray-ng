@@ -65,7 +65,7 @@ public sealed class ManagedService : IDisposable
         }
     }
 
-    private (string FileName, string? Prefix, bool UseCmdWrapper) ResolveCommand()
+    internal (string FileName, string? Prefix, bool UseCmdWrapper) ResolveCommand()
     {
         var configured = _config.ExecutablePath;
         if (!string.IsNullOrWhiteSpace(configured))
@@ -96,14 +96,14 @@ public sealed class ManagedService : IDisposable
         return (fallback, null, IsCmdFile(fallback));
     }
 
-    private static bool IsCmdFile(string path)
+    internal static bool IsCmdFile(string path)
     {
         var ext = Path.GetExtension(path);
         return ext.Equals(".cmd", StringComparison.OrdinalIgnoreCase)
             || ext.Equals(".bat", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string? FindOnPath(string exe)
+    internal static string? FindOnPath(string exe)
     {
         foreach (var dir in Environment.GetEnvironmentVariable("PATH")?.Split(';') ?? [])
         {
@@ -116,7 +116,7 @@ public sealed class ManagedService : IDisposable
         return null;
     }
 
-    private static bool IsPortAvailable(string hostname, int port)
+    internal static bool IsPortAvailable(string hostname, int port)
     {
         try
         {
@@ -131,7 +131,7 @@ public sealed class ManagedService : IDisposable
         }
     }
 
-    private static int FindAvailablePort(string hostname, int start)
+    internal static int FindAvailablePort(string hostname, int start)
     {
         for (var port = start; port <= 65535; port++)
         {
@@ -141,7 +141,7 @@ public sealed class ManagedService : IDisposable
         return 0;
     }
 
-    private static System.Net.IPAddress ResolveHost(string hostname)
+    internal static System.Net.IPAddress ResolveHost(string hostname)
     {
         return System.Net.IPAddress.TryParse(hostname, out var ip) ? ip : System.Net.IPAddress.Any;
     }
@@ -199,7 +199,7 @@ public sealed class ManagedService : IDisposable
             psi = new ProcessStartInfo
             {
                 FileName = exe,
-                Arguments = $"{command} {args}",
+                Arguments = prefix is null ? args : $"{prefix} {args}",
                 WorkingDirectory = workDir,
                 UseShellExecute = false,
                 CreateNoWindow = true,

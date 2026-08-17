@@ -8,15 +8,24 @@ public static class ConfigStore
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "service-tray-ng", "config.json");
 
+    internal static string? ConfigPathOverride { get; set; }
+
+    internal static string ResolveConfigPath() => ConfigPathOverride ?? ConfigPath;
+
     private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
 
     public static AppConfig Load()
     {
+        return LoadFrom(ResolveConfigPath());
+    }
+
+    internal static AppConfig LoadFrom(string configPath)
+    {
         try
         {
-            if (File.Exists(ConfigPath))
+            if (File.Exists(configPath))
             {
-                var json = File.ReadAllText(ConfigPath);
+                var json = File.ReadAllText(configPath);
                 var config = JsonSerializer.Deserialize<AppConfig>(json, Options);
                 if (config is not null)
                     return config;
@@ -54,10 +63,15 @@ public static class ConfigStore
 
     public static void Save(AppConfig config)
     {
-        var dir = Path.GetDirectoryName(ConfigPath)!;
-        Directory.CreateDirectory(dir);
-        File.WriteAllText(ConfigPath, JsonSerializer.Serialize(config, Options));
+        SaveTo(config, ResolveConfigPath());
     }
 
-    public static string ConfigFilePath => ConfigPath;
+    internal static void SaveTo(AppConfig config, string configPath)
+    {
+        var dir = Path.GetDirectoryName(configPath)!;
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(configPath, JsonSerializer.Serialize(config, Options));
+    }
+
+    public static string ConfigFilePath => ResolveConfigPath();
 }
