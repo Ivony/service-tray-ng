@@ -1,0 +1,41 @@
+tests/service-tray-ng.Tests/StringsTests.cs
+  s_9e5166974c7618::t_07a64e5f71fdb0 1-90
+Program.cs
+  s_9e5166974c7618::t_327f91e74361cf 18-19
+TrayApplicationContext.cs
+  s_9e5166974c7618::t_5f9e3c1b058e85 46
+  s_9e5166974c7618::t_e98c83da6594a9 312-321
+  s_9e5166974c7618::t_5fd875749c2962 183,186-188,190
+  s_9e5166974c7618::t_8c85a376c28df2 52,56,70-74,78-79,83-84
+  s_9e5166974c7618::t_acf84045d76a4d 229
+  s_9e5166974c7618::t_7a28cb6a619b9c 108
+  s_9e5166974c7618::t_c825bee951cfc4 155,157,159,161-162
+  s_9e5166974c7618::t_5ce91bd722528e 247
+  s_9e5166974c7618::t_133e7e786a316d 295
+PortDialog.cs
+  s_9e5166974c7618::t_c0bfac087d4b7d 37,45
+  s_9e5166974c7618::t_59b5ddad00df59 11,21
+Strings.cs
+  s_9e5166974c7618::t_9cdae46759378f 1-35,39-408,424
+  s_9e5166974c7618::t_3f45355e33c48e 409-423
+  s_9e5166974c7618::t_a826067e0bdff9 37-38
+  s_9e5166974c7618::t_5af10b4babd35e 36
+README.md
+  s_9e5166974c7618::t_953cdb061d0145 23-24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e7207aac5b940f709d56f482c1c80de8368dc5cb",
+  "prompts": {},
+  "sessions": {
+    "s_9e5166974c7618": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ff1b76ea6ffe3vIkV1BtetFVzR",
+        "model": "unknown"
+      },
+      "human_author": "zt11822 <zt11822@eminxing.com>"
+    }
+  }
+}
