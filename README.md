@@ -20,7 +20,8 @@ Each service gets its own tray icon, context menu, status dot, port, config, and
 - Per-service port setting + auto-switch to the next free port when occupied
 - Start tray on login (registry `Run` key); per-service auto-start on launch
 - Single config file with per-service sections
-- Daily per-service logs; single-instance guard
+- Per-service daily logs; single-instance guard
+- Localized UI: menu, status, balloon tips and dialogs follow the system UI language. Supported: en, zh, ja, ko, fr, de, es, it, pt, ru (falls back to English).
 
 ## Configuration
 

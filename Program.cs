@@ -15,8 +15,8 @@ static class Program
         catch (InvalidOperationException)
         {
             MessageBox.Show(
-                "Service Tray is already running in the notification area.",
-                "Service Tray",
+                Strings.Get("App.AlreadyRunning.Message"),
+                Strings.Get("App.Title"),
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
         }

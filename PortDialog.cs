@@ -8,7 +8,7 @@ public sealed class PortDialog : Form
 
     public PortDialog(int currentPort)
     {
-        Text = "Change server port";
+        Text = Strings.Get("Dialog.ChangePort");
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
@@ -18,7 +18,7 @@ public sealed class PortDialog : Form
 
         var label = new Label
         {
-            Text = "Server port:",
+            Text = Strings.Get("Dialog.ServerPort"),
             Location = new Point(20, 18),
             AutoSize = true,
         };
@@ -34,7 +34,7 @@ public sealed class PortDialog : Form
 
         var ok = new Button
         {
-            Text = "OK",
+            Text = Strings.Get("Dialog.OK"),
             DialogResult = DialogResult.OK,
             Location = new Point(20, 80),
             Width = 80,
@@ -42,7 +42,7 @@ public sealed class PortDialog : Form
 
         var cancel = new Button
         {
-            Text = "Cancel",
+            Text = Strings.Get("Dialog.Cancel"),
             DialogResult = DialogResult.Cancel,
             Location = new Point(110, 80),
             Width = 80,

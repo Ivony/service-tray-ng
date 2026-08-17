@@ -43,17 +43,17 @@ public sealed class TrayApplicationContext : ApplicationContext
         _singleInstance = new Mutex(true, "service-tray-ng-single-instance", out var isNew);
         if (!isNew)
         {
-            throw new InvalidOperationException("Service Tray is already running.");
+            throw new InvalidOperationException(Strings.Get("App.AlreadyRunning.Message"));
         }
 
         _config = ConfigStore.LoadForAllProfiles();
         _config.Services ??= new Dictionary<string, ServiceConfig>();
 
-        var startOnLoginItem = new ToolStripMenuItem("Start tray on login", null, OnToggleStartOnLogin)
+        var startOnLoginItem = new ToolStripMenuItem(Strings.Get("Menu.StartOnLogin"), null, OnToggleStartOnLogin)
         {
             Checked = IsStartOnLoginEnabled(),
         };
-        var exitItem = new ToolStripMenuItem("Exit", null, (_, _) => ExitThread());
+        var exitItem = new ToolStripMenuItem(Strings.Get("Menu.Exit"), null, (_, _) => ExitThread());
 
         foreach (var profile in ServiceProfiles.All)
         {
@@ -67,21 +67,21 @@ public sealed class TrayApplicationContext : ApplicationContext
             service.StatusChanged += (_, status) => OnStatusChanged(profile, serviceConfig, status);
             service.PortChanged += (_, _) => OnServicePortChanged(profile, serviceConfig);
 
-            var statusItem = new ToolStripMenuItem("Status: Stopped", null, (_, _) => OpenServer(profile, serviceConfig, service));
-            var startItem = new ToolStripMenuItem("Start", null, (_, _) => RunTask(service.StartAsync));
-            var stopItem = new ToolStripMenuItem("Stop", null, (_, _) => RunTask(service.StopAsync));
-            var restartItem = new ToolStripMenuItem("Restart", null, (_, _) => RunTask(service.RestartAsync));
-            var autoStartItem = new ToolStripMenuItem("Start service on launch", null, (_, _) => OnToggleAutoStart(serviceConfig))
+            var statusItem = new ToolStripMenuItem(Strings.Get("Menu.Status.Stopped"), null, (_, _) => OpenServer(profile, serviceConfig, service));
+            var startItem = new ToolStripMenuItem(Strings.Get("Menu.Start"), null, (_, _) => RunTask(service.StartAsync));
+            var stopItem = new ToolStripMenuItem(Strings.Get("Menu.Stop"), null, (_, _) => RunTask(service.StopAsync));
+            var restartItem = new ToolStripMenuItem(Strings.Get("Menu.Restart"), null, (_, _) => RunTask(service.RestartAsync));
+            var autoStartItem = new ToolStripMenuItem(Strings.Get("Menu.StartServiceOnLaunch"), null, (_, _) => OnToggleAutoStart(serviceConfig))
             {
                 Checked = serviceConfig.AutoStartService,
             };
-            var portItem = new ToolStripMenuItem($"Port: {serviceConfig.Port}", null, (_, _) => OnChangePort(serviceConfig, service));
-            var autoPortItem = new ToolStripMenuItem("Auto-switch port when occupied", null, (_, _) => OnToggleAutoPort(serviceConfig))
+            var portItem = new ToolStripMenuItem(string.Format(Strings.Get("Menu.Port"), serviceConfig.Port), null, (_, _) => OnChangePort(serviceConfig, service));
+            var autoPortItem = new ToolStripMenuItem(Strings.Get("Menu.AutoSwitchPort"), null, (_, _) => OnToggleAutoPort(serviceConfig))
             {
                 Checked = serviceConfig.AutoChangePort,
             };
-            var openLogsItem = new ToolStripMenuItem("Open log folder", null, (_, _) => OpenFolder(service.LogDirectory));
-            var openConfigItem = new ToolStripMenuItem("Open config", null, (_, _) => OpenFolder(Path.GetDirectoryName(ConfigStore.ConfigFilePath)!));
+            var openLogsItem = new ToolStripMenuItem(Strings.Get("Menu.OpenLogFolder"), null, (_, _) => OpenFolder(service.LogDirectory));
+            var openConfigItem = new ToolStripMenuItem(Strings.Get("Menu.OpenConfig"), null, (_, _) => OpenFolder(Path.GetDirectoryName(ConfigStore.ConfigFilePath)!));
 
             var menu = new ContextMenuStrip();
             menu.Items.AddRange(
@@ -105,7 +105,7 @@ public sealed class TrayApplicationContext : ApplicationContext
 
             var icon = new NotifyIcon
             {
-                Text = profile.DisplayName,
+                Text = ServiceName(profile),
                 Icon = MakeStatusIcon(profile, ServiceStatus.Stopped),
                 ContextMenuStrip = menu,
                 Visible = true,
@@ -152,14 +152,14 @@ public sealed class TrayApplicationContext : ApplicationContext
             ui.StopItem.Enabled = running;
             ui.RestartItem.Enabled = true;
             ui.StatusItem.Text = running
-                ? $"Running on {ui.Config.Hostname}:{ui.Config.Port}"
+                ? string.Format(Strings.Get("Menu.Status.Running"), ui.Config.Hostname, ui.Config.Port)
                 : ui.Service.Status == ServiceStatus.Error
-                    ? "Status: Error"
+                    ? Strings.Get("Menu.Status.Error")
                     : ui.Service.Status == ServiceStatus.Starting
-                        ? "Status: Starting..."
+                        ? Strings.Get("Menu.Status.Starting")
                         : ui.Service.Status == ServiceStatus.Stopping
-                            ? "Status: Stopping..."
-                            : "Status: Stopped";
+                            ? Strings.Get("Menu.Status.Stopping")
+                            : Strings.Get("Menu.Status.Stopped");
 
             ui.Icon.Icon = MakeStatusIcon(
                 ui.Profile,
@@ -180,14 +180,14 @@ public sealed class TrayApplicationContext : ApplicationContext
             return;
         _trayIconSafe(() =>
         {
-            _services.FirstOrDefault(ui => ui.Profile == profile)?.Icon.ShowBalloonTip(2000, profile.DisplayName,
+            _services.FirstOrDefault(ui => ui.Profile == profile)?.Icon.ShowBalloonTip(2000, ServiceName(profile),
                 status switch
                 {
-                    ServiceStatus.Running => $"Service running on {config.Hostname}:{config.Port}",
-                    ServiceStatus.Stopped => "Service stopped",
-                    ServiceStatus.Error => "Service failed to start. Open the log folder for details.",
+                    ServiceStatus.Running => string.Format(Strings.Get("Balloon.Running"), config.Hostname, config.Port),
+                    ServiceStatus.Stopped => Strings.Get("Balloon.Stopped"),
+                    ServiceStatus.Error => Strings.Get("Balloon.Error"),
                     _ => null,
-                } ?? "Service state changed.",
+                } ?? Strings.Get("Balloon.StateChanged"),
                 ToolTipIcon.Info);
         });
     }
@@ -226,7 +226,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         if (dialog.ShowDialog() != DialogResult.OK)
             return;
         config.Port = dialog.Port;
-        _services.First(u => u.Config == config).PortItem.Text = $"Port: {config.Port}";
+        _services.First(u => u.Config == config).PortItem.Text = string.Format(Strings.Get("Menu.Port"), config.Port);
         ConfigStore.Save(_config);
         if (service.Status == ServiceStatus.Running)
         {
@@ -244,7 +244,7 @@ public sealed class TrayApplicationContext : ApplicationContext
 
     private void OnServicePortChanged(ServiceProfile profile, ServiceConfig config)
     {
-        _services.First(ui => ui.Profile == profile).PortItem.Text = $"Port: {config.Port}";
+        _services.First(ui => ui.Profile == profile).PortItem.Text = string.Format(Strings.Get("Menu.Port"), config.Port);
         ConfigStore.Save(_config);
     }
 
@@ -292,7 +292,7 @@ public sealed class TrayApplicationContext : ApplicationContext
     {
         if (service.Status != ServiceStatus.Running)
         {
-            _services.First(ui => ui.Profile == profile).Icon.ShowBalloonTip(2000, profile.DisplayName, "Service is not running.", ToolTipIcon.Warning);
+            _services.First(ui => ui.Profile == profile).Icon.ShowBalloonTip(2000, ServiceName(profile), Strings.Get("Balloon.NotRunning"), ToolTipIcon.Warning);
             return;
         }
         try
@@ -307,6 +307,16 @@ public sealed class TrayApplicationContext : ApplicationContext
         {
             // ignore
         }
+    }
+
+    private static string ServiceName(ServiceProfile profile)
+    {
+        return profile.Key switch
+        {
+            "opencode" => Strings.Get("ServiceName.OpenCode"),
+            "dsh" => Strings.Get("ServiceName.Dsh"),
+            _ => profile.DisplayName,
+        };
     }
 
     private static Icon MakeStatusIcon(ServiceProfile profile, ServiceStatus status)
