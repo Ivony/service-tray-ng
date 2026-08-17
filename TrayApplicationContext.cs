@@ -22,6 +22,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         public required ToolStripMenuItem PortItem { get; init; }
         public required ToolStripMenuItem AutoPortItem { get; init; }
         public required ToolStripMenuItem AutoStartItem { get; init; }
+        public required ToolStripMenuItem StartOnLoginItem { get; init; }
         public required ContextMenuStrip Menu { get; init; }
     }
 
@@ -32,7 +33,6 @@ public sealed class TrayApplicationContext : ApplicationContext
     private bool _disposed;
 
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
-    private const string RunValue = "ServiceTrayNg";
 
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -40,7 +40,7 @@ public sealed class TrayApplicationContext : ApplicationContext
 
     public TrayApplicationContext()
     {
-        _singleInstance = new Mutex(true, "service-tray-ng-single-instance", out var isNew);
+        _singleInstance = new Mutex(true, Edition.MutexName, out var isNew);
         if (!isNew)
         {
             throw new InvalidOperationException(Strings.Get("App.AlreadyRunning.Message"));
@@ -48,12 +48,6 @@ public sealed class TrayApplicationContext : ApplicationContext
 
         _config = ConfigStore.LoadForAllProfiles();
         _config.Services ??= new Dictionary<string, ServiceConfig>();
-
-        var startOnLoginItem = new ToolStripMenuItem(Strings.Get("Menu.StartOnLogin"), null, OnToggleStartOnLogin)
-        {
-            Checked = IsStartOnLoginEnabled(),
-        };
-        var exitItem = new ToolStripMenuItem(Strings.Get("Menu.Exit"), null, (_, _) => ExitThread());
 
         foreach (var profile in ServiceProfiles.All)
         {
@@ -82,6 +76,11 @@ public sealed class TrayApplicationContext : ApplicationContext
             };
             var openLogsItem = new ToolStripMenuItem(Strings.Get("Menu.OpenLogFolder"), null, (_, _) => OpenFolder(service.LogDirectory));
             var openConfigItem = new ToolStripMenuItem(Strings.Get("Menu.OpenConfig"), null, (_, _) => OpenFolder(Path.GetDirectoryName(ConfigStore.ConfigFilePath)!));
+            var startOnLoginItem = new ToolStripMenuItem(Strings.Get("Menu.StartOnLogin"), null, OnToggleStartOnLogin)
+            {
+                Checked = IsStartOnLoginEnabled(),
+            };
+            var exitItem = new ToolStripMenuItem(Strings.Get("Menu.Exit"), null, (_, _) => ExitThread());
 
             var menu = new ContextMenuStrip();
             menu.Items.AddRange(
@@ -125,6 +124,7 @@ public sealed class TrayApplicationContext : ApplicationContext
                 PortItem = portItem,
                 AutoPortItem = autoPortItem,
                 AutoStartItem = autoStartItem,
+                StartOnLoginItem = startOnLoginItem,
                 Menu = menu,
             });
         }
@@ -209,7 +209,10 @@ public sealed class TrayApplicationContext : ApplicationContext
         var item = (ToolStripMenuItem)sender!;
         var enable = !item.Checked;
         SetStartOnLogin(enable);
-        item.Checked = enable;
+        foreach (var ui in _services)
+        {
+            ui.StartOnLoginItem.Checked = enable;
+        }
     }
 
     private void OnToggleAutoStart(ServiceConfig config)
@@ -251,7 +254,7 @@ public sealed class TrayApplicationContext : ApplicationContext
     private static bool IsStartOnLoginEnabled()
     {
         using var key = Registry.CurrentUser.OpenSubKey(RunKey);
-        return key?.GetValue(RunValue) is not null;
+        return key?.GetValue(Edition.RunValueName) is not null;
     }
 
     private static void SetStartOnLogin(bool enable)
@@ -263,11 +266,11 @@ public sealed class TrayApplicationContext : ApplicationContext
         var exe = Environment.ProcessPath;
         if (enable && exe is not null)
         {
-            key.SetValue(RunValue, $"\"{exe}\"");
+            key.SetValue(Edition.RunValueName, $"\"{exe}\"");
         }
         else
         {
-            key.DeleteValue(RunValue, throwOnMissingValue: false);
+            key.DeleteValue(Edition.RunValueName, throwOnMissingValue: false);
         }
     }
 

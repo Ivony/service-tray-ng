@@ -7,12 +7,22 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>service-tray-ng</AssemblyName>
+    <Edition Condition="'$(Edition)' == ''">all</Edition>
+    <AssemblyName Condition="'$(Edition)' == 'all'">service-tray-ng</AssemblyName>
+    <AssemblyName Condition="'$(Edition)' != 'all'">service-tray-ng-$(Edition)</AssemblyName>
     <Version>0.1.0</Version>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>false</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishReadyToRun>false</PublishReadyToRun>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Edition)' == 'dsh'">
+    <DefineConstants>$(DefineConstants);EDITION_DSH</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Edition)' == 'opencode'">
+    <DefineConstants>$(DefineConstants);EDITION_OPENCODE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

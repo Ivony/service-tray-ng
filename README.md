@@ -25,7 +25,9 @@ Each service gets its own tray icon, context menu, status dot, port, config, and
 
 ## Configuration
 
-`%LOCALAPPDATA%\service-tray-ng\config.json`
+`%LOCALAPPDATA%\service-tray-ng-<edition>\config.json` — the config directory is
+isolated per edition (`service-tray-ng-all`, `service-tray-ng-dsh`,
+`service-tray-ng-opencode`), so each variant keeps its own settings.
 
 ```json
 {
@@ -60,11 +62,24 @@ Note: `dsh web` requires Node.js and does not support `--host 0.0.0.0`.
 
 ## Build
 
+Publish three editions from the same project — pass `-p:Edition=` to select which
+service(s) the binary manages. Each edition gets its own exe name, single-instance
+lock, registry `Run` value and config path, so all three can be installed and run
+side by side.
+
 ```powershell
-dotnet publish -c Release -r win-x64
+# All-in-one: OpenCode + Dsh (default, same as no -p:Edition)
+dotnet publish -c Release -r win-x64 -p:Edition=all
+
+# DeepSeek Harness only
+dotnet publish -c Release -r win-x64 -p:Edition=dsh
+
+# OpenCode only
+dotnet publish -c Release -r win-x64 -p:Edition=opencode
 ```
 
-Single-file exe at `bin/Release/net8.0-windows/win-x64/publish/`.
+Single-file exes at `bin/Release/net8.0-windows/win-x64/publish/`:
+`service-tray-ng.exe`, `service-tray-ng-dsh.exe`, `service-tray-ng-opencode.exe`.
 
 ## Tests
 

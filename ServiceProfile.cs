@@ -52,5 +52,12 @@ public static class ServiceProfiles
         LogoDarkResource = "service_tray_ng.Assets.dsh-logo-dark.png",
     };
 
-    public static readonly IReadOnlyList<ServiceProfile> All = [OpenCode, Dsh];
+    public static readonly IReadOnlyList<ServiceProfile> All =
+#if EDITION_DSH
+        [Dsh];
+#elif EDITION_OPENCODE
+        [OpenCode];
+#else
+        [OpenCode, Dsh];
+#endif
 }

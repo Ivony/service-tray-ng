@@ -6,7 +6,7 @@ public static class ConfigStore
 {
     private static readonly string ConfigPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "service-tray-ng", "config.json");
+        Edition.ConfigDirName, "config.json");
 
     internal static string? ConfigPathOverride { get; set; }
 
