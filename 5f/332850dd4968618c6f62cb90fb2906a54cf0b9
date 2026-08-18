@@ -1,0 +1,27 @@
+TrayApplicationContext.cs
+  s_e734618354be55::t_40c1b848c89429 217,220-231
+Strings.cs
+  s_e734618354be55::t_40c1b848c89429 87,140
+tests/service-tray-ng.Tests/StringsTests.cs
+  s_e734618354be55::t_40c1b848c89429 87
+ManagedService.cs
+  s_e734618354be55::t_40c1b848c89429 249,255,257-259,263-280
+tests/service-tray-ng.Tests/ManagedServiceLifecycleTests.cs
+  s_e734618354be55::t_e4ed59938ad714 69-74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5f332850dd4968618c6f62cb90fb2906a54cf0b9",
+  "prompts": {},
+  "sessions": {
+    "s_e734618354be55": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fed24f128ffe6rDMQ1Y420IMU3",
+        "model": "unknown"
+      },
+      "human_author": "zt11822 <zt11822@eminxing.com>"
+    }
+  }
+}
