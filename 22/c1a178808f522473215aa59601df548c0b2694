@@ -1,0 +1,64 @@
+TrayApplicationContext.cs
+  s_a424630ac8782a::t_e3b7cdde6e6419 460,466-471
+  s_a424630ac8782a::t_d446aac8e1e8f0 33
+  s_a424630ac8782a::t_2edc8633826cc6 188-189,195,198,200-203,205-216,218,220-223,227-231
+  s_e734618354be55::t_e4b821e6911f9e 190,193-194,204,217,219,224-226
+  s_a424630ac8782a::t_662e3a21b3d42c 155-161
+  s_a424630ac8782a::t_17c32f2c69c928 148-150
+  s_e734618354be55::t_ef838311267d0f 191-192
+  s_e734618354be55::t_38d0077f6a529e 196-197,199
+  s_e734618354be55::t_a73208ef27a655 234
+tests/service-tray-ng.Tests/StringsTests.cs
+  s_a424630ac8782a::t_5174b51faff9fa 87,89-90
+  s_e734618354be55::t_ef838311267d0f 91-93
+ManagedService.cs
+  s_a424630ac8782a::t_bcb37d22fde85b 466-470
+  s_a424630ac8782a::t_e8301b99a926ed 151-155,161,163-173,175-190,192,204-210,212-262
+  s_e734618354be55::t_9881f46c1c700b 15-16,156-160,162,191,193-203,211
+  s_e734618354be55::t_03e84fe315d1e5 174
+  s_e734618354be55::t_a73208ef27a655 446-447
+tests/service-tray-ng.Tests/ManagedServiceResolveCommandTests.cs
+  s_a424630ac8782a::t_8230ee20877dc1 110-133
+ExternalProcessDialog.cs
+  s_e734618354be55::t_9881f46c1c700b 15,17-22,29-30,37,40-69,71-82,84-85,87-89,92,94-97,100-111,113-115
+  s_e734618354be55::t_e4b821e6911f9e 90
+  s_a424630ac8782a::t_d1eb0943fe9ab1 1-14,16,23-28,31-36,38-39,70,83,86,91,93,98-99,112,116-117
+Strings.cs
+  s_a424630ac8782a::t_a5822fe42f9078 499-507
+  s_a424630ac8782a::t_f79b8960cbf148 315-323
+  s_e734618354be55::t_e4b821e6911f9e 78-83,130-135
+  s_a424630ac8782a::t_8e3834808888ba 177-185
+  s_a424630ac8782a::t_5ba7422c763d15 361-369
+  s_a424630ac8782a::t_771e24e272c1a9 453-461
+  s_a424630ac8782a::t_aa85c9b3a8ac5d 223-231
+  s_a424630ac8782a::t_8beb84088bd987 125-129,136-139
+  s_a424630ac8782a::t_40e656c2c53804 73-77,84-87
+  s_a424630ac8782a::t_565c21cfc8a2f6 269-277
+  s_a424630ac8782a::t_2380205d8f3b53 407-415
+tests/service-tray-ng.Tests/ManagedServiceLifecycleTests.cs
+  s_e734618354be55::t_4b9be071146756 58-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "22c1a178808f522473215aa59601df548c0b2694",
+  "prompts": {},
+  "sessions": {
+    "s_a424630ac8782a": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fed3bfdb7ffeymwYYXT0JdkMFe",
+        "model": "unknown"
+      },
+      "human_author": "zt11822 <zt11822@eminxing.com>"
+    },
+    "s_e734618354be55": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fed24f128ffe6rDMQ1Y420IMU3",
+        "model": "unknown"
+      },
+      "human_author": "zt11822 <zt11822@eminxing.com>"
+    }
+  }
+}
