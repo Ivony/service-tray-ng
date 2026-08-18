@@ -246,17 +246,38 @@ public sealed class ManagedService : IDisposable
     }
 
     /// <summary>Force-kills the process <paramref name="pid"/> and its entire process tree.</summary>
-    internal static void KillProcessTree(int pid)
+    internal static bool KillProcessTree(int pid)
     {
         try
         {
             using var proc = Process.GetProcessById(pid);
             if (!proc.HasExited)
+            {
                 proc.Kill(entireProcessTree: true);
+                proc.WaitForExit(TimeSpan.FromSeconds(5));
+            }
+            return proc.HasExited;
         }
         catch
         {
-            // ignore
+            try
+            {
+                using var taskkill = Process.Start(new ProcessStartInfo
+                {
+                    FileName = "taskkill.exe",
+                    Arguments = $"/PID {pid} /T /F",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                });
+                taskkill?.WaitForExit(5000);
+                return taskkill?.ExitCode == 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 

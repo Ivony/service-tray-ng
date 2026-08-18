@@ -84,6 +84,7 @@ public static class Strings
 
         ["Balloon.Attached"] = "Service taken over on {0}:{1}",
         ["Balloon.AttachFailed"] = "Could not take over the existing process.",
+        ["Balloon.KillFailed"] = "Could not close all processes using the service port.",
 
         ["ServiceName.OpenCode"] = "OpenCode Service",
         ["ServiceName.Dsh"] = "Dsh Service",
@@ -136,6 +137,7 @@ public static class Strings
 
         ["Balloon.Attached"] = "已接管运行于 {0}:{1} 的服务",
         ["Balloon.AttachFailed"] = "无法接管现有进程。",
+        ["Balloon.KillFailed"] = "无法关闭所有占用服务端口的进程。",
 
         ["ServiceName.OpenCode"] = "OpenCode 服务",
         ["ServiceName.Dsh"] = "Dsh 服务",

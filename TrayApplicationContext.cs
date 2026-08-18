@@ -214,9 +214,21 @@ public sealed class TrayApplicationContext : ApplicationContext
                 break;
 
             case ExternalServiceAction.Kill:
+                var killFailed = false;
                 foreach (var process in processes)
                 {
-                    ManagedService.KillProcessTree(process.ProcessId);
+                    killFailed |= !ManagedService.KillProcessTree(process.ProcessId);
+                }
+
+                for (var attempt = 0; attempt < 10 && ManagedService.FindListeningProcesses(ui.Config.Port).Count > 0; attempt++)
+                {
+                    Thread.Sleep(100);
+                }
+
+                if (killFailed || ManagedService.FindListeningProcesses(ui.Config.Port).Count > 0)
+                {
+                    ui.Icon.ShowBalloonTip(2500, ServiceName(ui.Profile),
+                        Strings.Get("Balloon.KillFailed"), ToolTipIcon.Warning);
                 }
                 break;
 

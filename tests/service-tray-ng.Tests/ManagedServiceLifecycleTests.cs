@@ -66,6 +66,12 @@ public class ManagedServiceLifecycleTests
         Assert.Equal(ServiceStatus.Running, service.Status);
         Assert.True(await service.IsHealthyAsync());
 
+        var pid = ManagedService.FindListeningPid(port);
+        Assert.True(pid > 0);
+        Assert.True(ManagedService.KillProcessTree(pid));
+        await Task.Delay(100);
+        Assert.False(await service.IsHealthyAsync());
+
         await service.StopAsync();
 
         Assert.Equal(ServiceStatus.Stopped, service.Status);
