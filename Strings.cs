@@ -70,6 +70,21 @@ public static class Strings
         ["Dialog.OK"] = "OK",
         ["Dialog.Cancel"] = "Cancel",
 
+        ["Dialog.ExternalProcess.Title"] = "External process detected",
+        ["Dialog.ExternalProcess.Message"] = "The {0} is already running on {1}:{2}. What would you like to do?",
+        ["Dialog.ExternalProcess.Attach"] = "Take over existing process",
+        ["Dialog.ExternalProcess.Kill"] = "Force kill all processes",
+        ["Dialog.ExternalProcess.StartNew"] = "Start a new process",
+        ["Dialog.ExternalProcess.AttachOption"] = "Take over existing process\r\n{0}",
+        ["Dialog.ExternalProcess.KillOption"] = "Close all existing processes\r\n{0}",
+        ["Dialog.ExternalProcess.StartNewOption"] = "Start a new process on another port",
+        ["Dialog.ExternalProcess.ProcessDetail"] = "  {0} (PID {1}) listening on {2}",
+        ["Dialog.ExternalProcess.NoProcessDetails"] = "  No process details available.",
+        ["Dialog.ExternalProcess.NewPort"] = "New port:",
+
+        ["Balloon.Attached"] = "Service taken over on {0}:{1}",
+        ["Balloon.AttachFailed"] = "Could not take over the existing process.",
+
         ["ServiceName.OpenCode"] = "OpenCode Service",
         ["ServiceName.Dsh"] = "Dsh Service",
     };
@@ -106,6 +121,21 @@ public static class Strings
         ["Dialog.ServerPort"] = "服务端口：",
         ["Dialog.OK"] = "确定",
         ["Dialog.Cancel"] = "取消",
+
+        ["Dialog.ExternalProcess.Title"] = "检测到外部进程",
+        ["Dialog.ExternalProcess.Message"] = "{0} 已在 {1}:{2} 上运行。您想怎么处理？",
+        ["Dialog.ExternalProcess.Attach"] = "接管现有进程",
+        ["Dialog.ExternalProcess.Kill"] = "强行杀掉所有进程",
+        ["Dialog.ExternalProcess.StartNew"] = "开启新的进程",
+        ["Dialog.ExternalProcess.AttachOption"] = "接管现有进程\r\n{0}",
+        ["Dialog.ExternalProcess.KillOption"] = "关闭所有现有进程\r\n{0}",
+        ["Dialog.ExternalProcess.StartNewOption"] = "在其他端口开启新的进程",
+        ["Dialog.ExternalProcess.ProcessDetail"] = "  {0}（PID {1}），监听 {2}",
+        ["Dialog.ExternalProcess.NoProcessDetails"] = "  暂时无法获取进程详情。",
+        ["Dialog.ExternalProcess.NewPort"] = "新端口：",
+
+        ["Balloon.Attached"] = "已接管运行于 {0}:{1} 的服务",
+        ["Balloon.AttachFailed"] = "无法接管现有进程。",
 
         ["ServiceName.OpenCode"] = "OpenCode 服务",
         ["ServiceName.Dsh"] = "Dsh 服务",
@@ -144,6 +174,15 @@ public static class Strings
         ["Dialog.OK"] = "OK",
         ["Dialog.Cancel"] = "キャンセル",
 
+        ["Dialog.ExternalProcess.Title"] = "外部プロセスを検出しました",
+        ["Dialog.ExternalProcess.Message"] = "{0} は既に {1}:{2} で実行されています。どうしますか？",
+        ["Dialog.ExternalProcess.Attach"] = "既存プロセスを引き継ぐ",
+        ["Dialog.ExternalProcess.Kill"] = "すべてのプロセスを強制終了",
+        ["Dialog.ExternalProcess.StartNew"] = "新しいプロセスを開始",
+
+        ["Balloon.Attached"] = "{0}:{1} のサービスを引き継ぎました",
+        ["Balloon.AttachFailed"] = "既存プロセスを引き継げませんでした。",
+
         ["ServiceName.OpenCode"] = "OpenCode サービス",
         ["ServiceName.Dsh"] = "Dsh サービス",
     };
@@ -180,6 +219,15 @@ public static class Strings
         ["Dialog.ServerPort"] = "서버 포트:",
         ["Dialog.OK"] = "확인",
         ["Dialog.Cancel"] = "취소",
+
+        ["Dialog.ExternalProcess.Title"] = "외부 프로세스 감지됨",
+        ["Dialog.ExternalProcess.Message"] = "{0}이(가) 이미 {1}:{2}에서 실행 중입니다. 어떻게 하시겠습니까?",
+        ["Dialog.ExternalProcess.Attach"] = "기존 프로세스 인계",
+        ["Dialog.ExternalProcess.Kill"] = "모든 프로세스 강제 종료",
+        ["Dialog.ExternalProcess.StartNew"] = "새 프로세스 시작",
+
+        ["Balloon.Attached"] = "{0}:{1} 서비스를 인계했습니다",
+        ["Balloon.AttachFailed"] = "기존 프로세스를 인계할 수 없습니다.",
 
         ["ServiceName.OpenCode"] = "OpenCode 서비스",
         ["ServiceName.Dsh"] = "Dsh 서비스",
@@ -218,6 +266,15 @@ public static class Strings
         ["Dialog.OK"] = "OK",
         ["Dialog.Cancel"] = "Annuler",
 
+        ["Dialog.ExternalProcess.Title"] = "Processus externe détecté",
+        ["Dialog.ExternalProcess.Message"] = "{0} est déjà en cours d'exécution sur {1}:{2}. Que souhaitez-vous faire ?",
+        ["Dialog.ExternalProcess.Attach"] = "Reprendre le processus existant",
+        ["Dialog.ExternalProcess.Kill"] = "Forcer l'arrêt de tous les processus",
+        ["Dialog.ExternalProcess.StartNew"] = "Démarrer un nouveau processus",
+
+        ["Balloon.Attached"] = "Service repris sur {0}:{1}",
+        ["Balloon.AttachFailed"] = "Impossible de reprendre le processus existant.",
+
         ["ServiceName.OpenCode"] = "Service OpenCode",
         ["ServiceName.Dsh"] = "Service Dsh",
     };
@@ -254,6 +311,15 @@ public static class Strings
         ["Dialog.ServerPort"] = "Server-Port:",
         ["Dialog.OK"] = "OK",
         ["Dialog.Cancel"] = "Abbrechen",
+
+        ["Dialog.ExternalProcess.Title"] = "Externer Prozess erkannt",
+        ["Dialog.ExternalProcess.Message"] = "{0} läuft bereits auf {1}:{2}. Was möchten Sie tun?",
+        ["Dialog.ExternalProcess.Attach"] = "Vorhandenen Prozess übernehmen",
+        ["Dialog.ExternalProcess.Kill"] = "Alle Prozesse zwangsbeenden",
+        ["Dialog.ExternalProcess.StartNew"] = "Neuen Prozess starten",
+
+        ["Balloon.Attached"] = "Dienst auf {0}:{1} übernommen",
+        ["Balloon.AttachFailed"] = "Vorhandener Prozess konnte nicht übernommen werden.",
 
         ["ServiceName.OpenCode"] = "OpenCode-Dienst",
         ["ServiceName.Dsh"] = "Dsh-Dienst",
@@ -292,6 +358,15 @@ public static class Strings
         ["Dialog.OK"] = "Aceptar",
         ["Dialog.Cancel"] = "Cancelar",
 
+        ["Dialog.ExternalProcess.Title"] = "Proceso externo detectado",
+        ["Dialog.ExternalProcess.Message"] = "{0} ya se está ejecutando en {1}:{2}. ¿Qué desea hacer?",
+        ["Dialog.ExternalProcess.Attach"] = "Asumir el proceso existente",
+        ["Dialog.ExternalProcess.Kill"] = "Forzar la detención de todos los procesos",
+        ["Dialog.ExternalProcess.StartNew"] = "Iniciar un nuevo proceso",
+
+        ["Balloon.Attached"] = "Servicio asumido en {0}:{1}",
+        ["Balloon.AttachFailed"] = "No se pudo asumir el proceso existente.",
+
         ["ServiceName.OpenCode"] = "Servicio OpenCode",
         ["ServiceName.Dsh"] = "Servicio Dsh",
     };
@@ -328,6 +403,15 @@ public static class Strings
         ["Dialog.ServerPort"] = "Porta del server:",
         ["Dialog.OK"] = "OK",
         ["Dialog.Cancel"] = "Annulla",
+
+        ["Dialog.ExternalProcess.Title"] = "Rilevato processo esterno",
+        ["Dialog.ExternalProcess.Message"] = "{0} è già in esecuzione su {1}:{2}. Cosa si desidera fare?",
+        ["Dialog.ExternalProcess.Attach"] = "Subentrare al processo esistente",
+        ["Dialog.ExternalProcess.Kill"] = "Terminare forzatamente tutti i processi",
+        ["Dialog.ExternalProcess.StartNew"] = "Avviare un nuovo processo",
+
+        ["Balloon.Attached"] = "Servizio subentrato su {0}:{1}",
+        ["Balloon.AttachFailed"] = "Impossibile subentrare al processo esistente.",
 
         ["ServiceName.OpenCode"] = "Servizio OpenCode",
         ["ServiceName.Dsh"] = "Servizio Dsh",
@@ -366,6 +450,15 @@ public static class Strings
         ["Dialog.OK"] = "OK",
         ["Dialog.Cancel"] = "Cancelar",
 
+        ["Dialog.ExternalProcess.Title"] = "Processo externo detectado",
+        ["Dialog.ExternalProcess.Message"] = "{0} já está em execução em {1}:{2}. O que deseja fazer?",
+        ["Dialog.ExternalProcess.Attach"] = "Assumir o processo existente",
+        ["Dialog.ExternalProcess.Kill"] = "Forçar encerramento de todos os processos",
+        ["Dialog.ExternalProcess.StartNew"] = "Iniciar um novo processo",
+
+        ["Balloon.Attached"] = "Serviço assumido em {0}:{1}",
+        ["Balloon.AttachFailed"] = "Não foi possível assumir o processo existente.",
+
         ["ServiceName.OpenCode"] = "Serviço OpenCode",
         ["ServiceName.Dsh"] = "Serviço Dsh",
     };
@@ -402,6 +495,15 @@ public static class Strings
         ["Dialog.ServerPort"] = "Порт сервера:",
         ["Dialog.OK"] = "ОК",
         ["Dialog.Cancel"] = "Отмена",
+
+        ["Dialog.ExternalProcess.Title"] = "Обнаружен внешний процесс",
+        ["Dialog.ExternalProcess.Message"] = "{0} уже работает на {1}:{2}. Что вы хотите сделать?",
+        ["Dialog.ExternalProcess.Attach"] = "Взять управление процессом",
+        ["Dialog.ExternalProcess.Kill"] = "Принудительно завершить все процессы",
+        ["Dialog.ExternalProcess.StartNew"] = "Запустить новый процесс",
+
+        ["Balloon.Attached"] = "Управление службой на {0}:{1} принято",
+        ["Balloon.AttachFailed"] = "Не удалось взять управление существующим процессом.",
 
         ["ServiceName.OpenCode"] = "Служба OpenCode",
         ["ServiceName.Dsh"] = "Служба Dsh",

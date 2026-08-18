@@ -84,7 +84,13 @@ public class StringsTests : IDisposable
         "Menu.Start", "Menu.Stop", "Menu.Restart", "Menu.Exit", "Menu.StartOnLogin", "Menu.StartServiceOnLaunch",
         "Menu.Port", "Menu.AutoSwitchPort", "Menu.OpenLogFolder", "Menu.OpenConfig",
         "Balloon.Running", "Balloon.Stopped", "Balloon.Error", "Balloon.StateChanged", "Balloon.NotRunning",
+        "Balloon.Attached", "Balloon.AttachFailed",
         "Dialog.ChangePort", "Dialog.ServerPort", "Dialog.OK", "Dialog.Cancel",
+        "Dialog.ExternalProcess.Title", "Dialog.ExternalProcess.Message",
+        "Dialog.ExternalProcess.Attach", "Dialog.ExternalProcess.Kill", "Dialog.ExternalProcess.StartNew",
+        "Dialog.ExternalProcess.AttachOption", "Dialog.ExternalProcess.KillOption",
+        "Dialog.ExternalProcess.StartNewOption", "Dialog.ExternalProcess.ProcessDetail",
+        "Dialog.ExternalProcess.NoProcessDetails", "Dialog.ExternalProcess.NewPort",
         "ServiceName.OpenCode", "ServiceName.Dsh",
     ];
 }

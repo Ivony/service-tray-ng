@@ -12,6 +12,8 @@ public enum ServiceStatus
     Error,
 }
 
+public sealed record ListeningProcess(int ProcessId, string ProcessName, string Endpoint);
+
 public sealed class ManagedService : IDisposable
 {
     private readonly ServiceProfile _profile;
@@ -144,6 +146,118 @@ public sealed class ManagedService : IDisposable
     internal static System.Net.IPAddress ResolveHost(string hostname)
     {
         return System.Net.IPAddress.TryParse(hostname, out var ip) ? ip : System.Net.IPAddress.Any;
+    }
+
+    /// <summary>
+    /// Returns the process ID of the process currently listening on <paramref name="port"/>,
+    /// or 0 when no process is listening there.
+    /// </summary>
+    internal static int FindListeningPid(int port)
+    {
+        return FindListeningProcesses(port).FirstOrDefault()?.ProcessId ?? 0;
+    }
+
+    internal static IReadOnlyList<ListeningProcess> FindListeningProcesses(int port)
+    {
+        var processes = new Dictionary<int, ListeningProcess>();
+        try
+        {
+            var psi = new ProcessStartInfo("netstat", "-ano -p tcp")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+            using var proc = Process.Start(psi);
+            if (proc is null)
+                return Array.Empty<ListeningProcess>();
+            var output = proc.StandardOutput.ReadToEnd();
+            proc.WaitForExit();
+            foreach (var line in output.Split('\n'))
+            {
+                var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length < 5)
+                    continue;
+                if (!parts[0].Equals("TCP", StringComparison.OrdinalIgnoreCase))
+                    continue;
+                if (!parts[3].Equals("LISTENING", StringComparison.OrdinalIgnoreCase))
+                    continue;
+                var local = parts[1];
+                var colon = local.LastIndexOf(':');
+                if (colon < 0)
+                    continue;
+                if (int.TryParse(local[(colon + 1)..], out var linePort) && linePort == port
+                    && int.TryParse(parts[4], out var pid) && !processes.ContainsKey(pid))
+                {
+                    var name = "Unknown process";
+                    try
+                    {
+                        using var process = Process.GetProcessById(pid);
+                        name = process.ProcessName;
+                    }
+                    catch
+                    {
+                        // The process may exit between netstat and process lookup.
+                    }
+                    processes[pid] = new ListeningProcess(pid, name, local);
+                }
+            }
+        }
+        catch
+        {
+            // ignore
+        }
+        return processes.Values.ToArray();
+    }
+
+    /// <summary>
+    /// Takes over an already-running process identified by <paramref name="pid"/> so the
+    /// tray can manage (stop/restart) it. Returns false when the process no longer exists.
+    /// </summary>
+    public bool TryAttach(int pid)
+    {
+        try
+        {
+            var proc = Process.GetProcessById(pid);
+            if (proc.HasExited)
+                return false;
+
+            lock (_lock)
+            {
+                _process = proc;
+            }
+            proc.Exited += (_, _) =>
+            {
+                Log($"Attached process exited with code {proc.ExitCode}.");
+                SetStatus(proc.ExitCode == 0 ? ServiceStatus.Stopped : ServiceStatus.Error);
+                CleanupProcess(proc);
+            };
+            proc.EnableRaisingEvents = true;
+            SetStatus(ServiceStatus.Running);
+            Log($"Attached to existing process {pid}.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log($"Failed to attach to process {pid}: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>Force-kills the process <paramref name="pid"/> and its entire process tree.</summary>
+    internal static void KillProcessTree(int pid)
+    {
+        try
+        {
+            using var proc = Process.GetProcessById(pid);
+            if (!proc.HasExited)
+                proc.Kill(entireProcessTree: true);
+        }
+        catch
+        {
+            // ignore
+        }
     }
 
     public async Task StartAsync()
@@ -329,6 +443,8 @@ public sealed class ManagedService : IDisposable
     {
         lock (_lock)
         {
+            if (_status == status)
+                return;
             _status = status;
         }
         StatusChanged?.Invoke(this, status);
@@ -347,7 +463,11 @@ public sealed class ManagedService : IDisposable
                 try
                 {
                     proc.Kill(entireProcessTree: true);
-                    proc.WaitForExit();
+                    if (!proc.WaitForExit(TimeSpan.FromSeconds(5)) && !proc.HasExited)
+                    {
+                        proc.Kill(entireProcessTree: true);
+                        proc.WaitForExit(TimeSpan.FromSeconds(2));
+                    }
                 }
                 catch
                 {

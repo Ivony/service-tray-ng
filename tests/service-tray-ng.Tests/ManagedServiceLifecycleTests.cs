@@ -55,6 +55,11 @@ public class ManagedServiceLifecycleTests
         };
 
         using var service = new ManagedService(profile, config);
+        var statuses = new List<ServiceStatus>();
+        service.StatusChanged += (_, status) => statuses.Add(status);
+
+        await service.StopAsync();
+        Assert.Empty(statuses);
 
         await service.StartAsync();
 

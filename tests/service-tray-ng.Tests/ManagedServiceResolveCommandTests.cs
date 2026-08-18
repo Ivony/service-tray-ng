@@ -107,6 +107,30 @@ public class ManagedServiceResolveCommandTests
         Assert.True(ManagedService.IsPortAvailable("127.0.0.1", found));
     }
 
+    [Fact]
+    public void FindListeningPid_ReturnsPidOfCurrentListeningProcess()
+    {
+        var port = GetFreePort();
+        using var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, port);
+        listener.Start();
+        try
+        {
+            var pid = ManagedService.FindListeningPid(port);
+            Assert.Equal(Environment.ProcessId, pid);
+        }
+        finally
+        {
+            listener.Stop();
+        }
+    }
+
+    [Fact]
+    public void FindListeningPid_ReturnsZeroWhenPortIsFree()
+    {
+        var port = GetFreePort();
+        Assert.Equal(0, ManagedService.FindListeningPid(port));
+    }
+
     private static int GetFreePort()
     {
         var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
