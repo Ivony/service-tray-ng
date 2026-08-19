@@ -1,0 +1,19 @@
+service-tray-ng.csproj
+  s_a58aadc228b4e6::t_d7dba83640a7a6 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a371950e9a1f969cd55f5254b735e2e757f2e709",
+  "prompts": {},
+  "sessions": {
+    "s_a58aadc228b4e6": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_febefd286ffek6iTa0yZVcIgTK",
+        "model": "unknown"
+      },
+      "human_author": "zt11822 <zt11822@eminxing.com>"
+    }
+  }
+}
