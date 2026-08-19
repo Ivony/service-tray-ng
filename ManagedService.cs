@@ -12,16 +12,21 @@ public enum ServiceStatus
     Error,
 }
 
-public sealed record ListeningProcess(int ProcessId, string ProcessName, string Endpoint);
+public sealed record ListeningProcess(int ProcessId, string ProcessName, string Endpoint, int Port);
 
 public sealed class ManagedService : IDisposable
 {
+    private static readonly HttpClient ProbeClient = new()
+    {
+        Timeout = TimeSpan.FromMilliseconds(700),
+    };
     private readonly ServiceProfile _profile;
     private readonly ServiceConfig _config;
     private Process? _process;
     private readonly object _lock = new();
     private CancellationTokenSource? _cts;
     private ServiceStatus _status = ServiceStatus.Stopped;
+    private bool _stopRequested;
 
     public string LogDirectory { get; }
 
@@ -159,10 +164,30 @@ public sealed class ManagedService : IDisposable
 
     internal static IReadOnlyList<ListeningProcess> FindListeningProcesses(int port)
     {
-        var processes = new Dictionary<int, ListeningProcess>();
+        return FindListeningProcesses()
+            .Where(process => process.Port == port)
+            .ToArray();
+    }
+
+    internal static IReadOnlyList<ListeningProcess> FindListeningProcesses()
+    {
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            var processes = FindListeningProcessesSnapshot();
+            if (processes.Count > 0 || attempt == 2)
+                return processes;
+            Thread.Sleep(75);
+        }
+
+        return Array.Empty<ListeningProcess>();
+    }
+
+    private static IReadOnlyList<ListeningProcess> FindListeningProcessesSnapshot()
+    {
+        var processes = new Dictionary<(int ProcessId, int Port), ListeningProcess>();
         try
         {
-            var psi = new ProcessStartInfo("netstat", "-ano -p tcp")
+            var psi = new ProcessStartInfo("netstat", "-ano")
             {
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -187,8 +212,9 @@ public sealed class ManagedService : IDisposable
                 var colon = local.LastIndexOf(':');
                 if (colon < 0)
                     continue;
-                if (int.TryParse(local[(colon + 1)..], out var linePort) && linePort == port
-                    && int.TryParse(parts[4], out var pid) && !processes.ContainsKey(pid))
+                if (int.TryParse(local[(colon + 1)..], out var linePort)
+                    && int.TryParse(parts[4], out var pid)
+                    && !processes.ContainsKey((pid, linePort)))
                 {
                     var name = "Unknown process";
                     try
@@ -200,7 +226,7 @@ public sealed class ManagedService : IDisposable
                     {
                         // The process may exit between netstat and process lookup.
                     }
-                    processes[pid] = new ListeningProcess(pid, name, local);
+                    processes[(pid, linePort)] = new ListeningProcess(pid, name, local, linePort);
                 }
             }
         }
@@ -209,6 +235,56 @@ public sealed class ManagedService : IDisposable
             // ignore
         }
         return processes.Values.ToArray();
+    }
+
+    internal async Task<IReadOnlyList<ListeningProcess>> FindExternalProcessesAsync()
+    {
+        var processNames = CandidateProcessNames();
+        var candidates = FindListeningProcesses()
+            .Where(process => processNames.Contains(process.ProcessName))
+            .ToArray();
+        var external = new List<ListeningProcess>();
+
+        var results = await Task.WhenAll(candidates.Select(async candidate =>
+            await RespondsToHttpAsync(candidate.Port) ? candidate : null));
+        external.AddRange(results.OfType<ListeningProcess>());
+
+        return external;
+    }
+
+    private HashSet<string> CandidateProcessNames()
+    {
+        var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var commandName in _profile.CommandNames)
+            names.Add(Path.GetFileNameWithoutExtension(commandName));
+
+        if (!string.IsNullOrWhiteSpace(_config.ExecutablePath))
+            names.Add(Path.GetFileNameWithoutExtension(_config.ExecutablePath));
+
+        if (!string.IsNullOrWhiteSpace(_profile.NpxPackage))
+        {
+            names.Add("node");
+            names.Add("cmd");
+            names.Add("npx");
+            names.Add("npm");
+        }
+
+        return names;
+    }
+
+    private static async Task<bool> RespondsToHttpAsync(int port)
+    {
+        try
+        {
+            using var response = await ProbeClient.GetAsync(
+                $"http://127.0.0.1:{port}/",
+                HttpCompletionOption.ResponseHeadersRead);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     /// <summary>
@@ -230,7 +306,8 @@ public sealed class ManagedService : IDisposable
             proc.Exited += (_, _) =>
             {
                 Log($"Attached process exited with code {proc.ExitCode}.");
-                SetStatus(proc.ExitCode == 0 ? ServiceStatus.Stopped : ServiceStatus.Error);
+                var stopping = IsStopRequested();
+                SetStatus(stopping || proc.ExitCode == 0 ? ServiceStatus.Stopped : ServiceStatus.Error);
                 CleanupProcess(proc);
             };
             proc.EnableRaisingEvents = true;
@@ -286,6 +363,7 @@ public sealed class ManagedService : IDisposable
         Process? existing;
         lock (_lock)
         {
+            _stopRequested = false;
             existing = _process;
             if (_process is { HasExited: false })
                 return;
@@ -358,7 +436,8 @@ public sealed class ManagedService : IDisposable
             proc.Exited += (_, _) =>
             {
                 Log($"Process exited with code {proc.ExitCode}.");
-                SetStatus(proc.ExitCode == 0 ? ServiceStatus.Stopped : ServiceStatus.Error);
+                var stopping = IsStopRequested();
+                SetStatus(stopping || proc.ExitCode == 0 ? ServiceStatus.Stopped : ServiceStatus.Error);
                 CleanupProcess(proc);
             };
             proc.EnableRaisingEvents = true;
@@ -384,6 +463,7 @@ public sealed class ManagedService : IDisposable
         {
             proc = _process;
             _process = null;
+            _stopRequested = true;
         }
 
         if (proc is { HasExited: false })
@@ -395,12 +475,54 @@ public sealed class ManagedService : IDisposable
             try
             {
                 proc.Kill(entireProcessTree: true);
-                await proc.WaitForExitAsync();
+                using var stopTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(8));
+                try
+                {
+                    await proc.WaitForExitAsync(stopTimeout.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    Log("Timed out waiting for service process to exit.");
+                }
+                catch (InvalidOperationException)
+                {
+                    // The Exited handler may have disposed the process between Kill and WaitForExitAsync.
+                    Log("Service process exited while its process handle was being cleaned up.");
+                }
+
+                var exited = true;
+                try
+                {
+                    exited = proc.HasExited;
+                }
+                catch (InvalidOperationException)
+                {
+                    // A disposed process handle means the Exited handler already completed cleanup.
+                }
+
+                if (!exited)
+                {
+                    Log("Service process is still running after termination request.");
+                    proc.Dispose();
+                    SetStatus(ServiceStatus.Error);
+                    throw new InvalidOperationException($"Failed to stop {_profile.DisplayName}: process is still running.");
+                }
+
+                if (!await StopListeningProcessesAsync(_config.Port))
+                {
+                    Log($"Service port {_config.Port} is still occupied after process tree termination.");
+                    proc.Dispose();
+                    SetStatus(ServiceStatus.Error);
+                    throw new InvalidOperationException($"Failed to stop {_profile.DisplayName}: port is still occupied.");
+                }
             }
             catch (Exception ex)
             {
                 Log($"Stop failed: {ex}");
                 Debug.WriteLine($"Stop failed: {ex.Message}");
+                proc.Dispose();
+                SetStatus(ServiceStatus.Error);
+                throw;
             }
 
             proc.Dispose();
@@ -458,6 +580,29 @@ public sealed class ManagedService : IDisposable
                 _process = null;
         }
         proc.Dispose();
+    }
+
+    private bool IsStopRequested()
+    {
+        lock (_lock)
+            return _stopRequested;
+    }
+
+    private static async Task<bool> StopListeningProcessesAsync(int port)
+    {
+        for (var attempt = 0; attempt < 20; attempt++)
+        {
+            var listeners = FindListeningProcesses(port);
+            if (listeners.Count == 0)
+                return true;
+
+            foreach (var listener in listeners)
+                KillProcessTree(listener.ProcessId);
+
+            await Task.Delay(100);
+        }
+
+        return FindListeningProcesses(port).Count == 0;
     }
 
     private void SetStatus(ServiceStatus status)

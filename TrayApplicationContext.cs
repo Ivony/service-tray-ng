@@ -30,8 +30,8 @@ public sealed class TrayApplicationContext : ApplicationContext
     private readonly AppConfig _config;
     private readonly System.Windows.Forms.Timer _pollTimer;
     private readonly Mutex _singleInstance;
-    private readonly HashSet<string> _externalPrompted = [];
     private bool _disposed;
+    private bool _exitStarted;
 
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
 
@@ -63,9 +63,9 @@ public sealed class TrayApplicationContext : ApplicationContext
             service.PortChanged += (_, _) => OnServicePortChanged(profile, serviceConfig);
 
             var statusItem = new ToolStripMenuItem(Strings.Get("Menu.Status.Stopped"), null, (_, _) => OpenServer(profile, serviceConfig, service));
-            var startItem = new ToolStripMenuItem(Strings.Get("Menu.Start"), null, (_, _) => RunTask(service.StartAsync));
+            var startItem = new ToolStripMenuItem(Strings.Get("Menu.Start"));
             var stopItem = new ToolStripMenuItem(Strings.Get("Menu.Stop"), null, (_, _) => RunTask(service.StopAsync));
-            var restartItem = new ToolStripMenuItem(Strings.Get("Menu.Restart"), null, (_, _) => RunTask(service.RestartAsync));
+            var restartItem = new ToolStripMenuItem(Strings.Get("Menu.Restart"));
             var autoStartItem = new ToolStripMenuItem(Strings.Get("Menu.StartServiceOnLaunch"), null, (_, _) => OnToggleAutoStart(serviceConfig))
             {
                 Checked = serviceConfig.AutoStartService,
@@ -81,7 +81,7 @@ public sealed class TrayApplicationContext : ApplicationContext
             {
                 Checked = IsStartOnLoginEnabled(),
             };
-            var exitItem = new ToolStripMenuItem(Strings.Get("Menu.Exit"), null, (_, _) => ExitThread());
+            var exitItem = new ToolStripMenuItem(Strings.Get("Menu.Exit"), null, (_, _) => BeginExit());
 
             var menu = new ContextMenuStrip();
             menu.Items.AddRange(
@@ -112,7 +112,7 @@ public sealed class TrayApplicationContext : ApplicationContext
             };
             icon.DoubleClick += (_, _) => OpenServer(profile, serviceConfig, service);
 
-            _services.Add(new ServiceUi
+            var serviceUi = new ServiceUi
             {
                 Profile = profile,
                 Config = serviceConfig,
@@ -127,7 +127,10 @@ public sealed class TrayApplicationContext : ApplicationContext
                 AutoStartItem = autoStartItem,
                 StartOnLoginItem = startOnLoginItem,
                 Menu = menu,
-            });
+            };
+            _services.Add(serviceUi);
+            startItem.Click += (_, _) => RunTask(() => StartServiceAsync(serviceUi));
+            restartItem.Click += (_, _) => RunTask(() => RestartServiceAsync(serviceUi));
         }
 
         _pollTimer = new System.Windows.Forms.Timer { Interval = 2000 };
@@ -138,7 +141,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         {
             if (ui.Config.AutoStartService)
             {
-                RunTask(ui.Service.StartAsync);
+                RunTask(() => StartServiceAsync(ui));
             }
         }
     }
@@ -152,12 +155,6 @@ public sealed class TrayApplicationContext : ApplicationContext
         {
             var healthy = await ui.Service.IsHealthyAsync();
             var running = ui.Service.Status == ServiceStatus.Running && healthy;
-
-            if (!running && healthy && _externalPrompted.Add(ui.Profile.Key))
-            {
-                HandleExternalProcess(ui);
-                continue;
-            }
 
             ui.StartItem.Enabled = !running;
             ui.StopItem.Enabled = running;
@@ -185,24 +182,56 @@ public sealed class TrayApplicationContext : ApplicationContext
         _ = Task.Run(action);
     }
 
-    private void HandleExternalProcess(ServiceUi ui)
+    private async Task StartServiceAsync(ServiceUi ui)
     {
-        var processes = ManagedService.FindListeningProcesses(ui.Config.Port);
+        if (ui.Service.Status == ServiceStatus.Running)
+            return;
+
+        var externalProcesses = await ui.Service.FindExternalProcessesAsync();
+        if (externalProcesses.Count > 0)
+        {
+            var action = await HandleExternalProcessAsync(ui, externalProcesses);
+            if (action is null or ExternalServiceAction.Attach)
+                return;
+
+            if (ManagedService.FindListeningProcesses(ui.Config.Port).Count > 0)
+                return;
+        }
+
+        await ui.Service.StartAsync();
+    }
+
+    private async Task RestartServiceAsync(ServiceUi ui)
+    {
+        await ui.Service.StopAsync();
+        await StartServiceAsync(ui);
+    }
+
+    private async Task<ExternalServiceAction?> HandleExternalProcessAsync(
+        ServiceUi ui,
+        IReadOnlyList<ListeningProcess> processes)
+    {
         var defaultNewPort = ManagedService.FindAvailablePort(
             ui.Config.Hostname, ui.Config.Port < 65535 ? ui.Config.Port + 1 : 1);
         using var dialog = new ExternalProcessDialog(
             ServiceName(ui.Profile), ui.Config.Hostname, ui.Config.Port, processes, defaultNewPort);
         if (dialog.ShowDialog() != DialogResult.OK)
         {
-            ExitThread();
-            return;
+            BeginExit();
+            return null;
         }
 
         switch (dialog.Action)
         {
             case ExternalServiceAction.Attach:
-                if (processes.Count > 0 && ui.Service.TryAttach(processes[0].ProcessId))
+                var selected = processes
+                    .OrderBy(process => process.Port == ui.Config.Port ? 0 : 1)
+                    .FirstOrDefault();
+                if (selected is not null && ui.Service.TryAttach(selected.ProcessId))
                 {
+                    ui.Config.Port = selected.Port;
+                    ui.PortItem.Text = string.Format(Strings.Get("Menu.Port"), ui.Config.Port);
+                    ConfigStore.Save(_config);
                     ui.Icon.ShowBalloonTip(2000, ServiceName(ui.Profile),
                         string.Format(Strings.Get("Balloon.Attached"), ui.Config.Hostname, ui.Config.Port),
                         ToolTipIcon.Info);
@@ -210,8 +239,9 @@ public sealed class TrayApplicationContext : ApplicationContext
                 else
                 {
                     ui.Icon.ShowBalloonTip(2000, ServiceName(ui.Profile), Strings.Get("Balloon.AttachFailed"), ToolTipIcon.Warning);
+                    return null;
                 }
-                break;
+                return ExternalServiceAction.Attach;
 
             case ExternalServiceAction.Kill:
                 var killFailed = false;
@@ -222,7 +252,7 @@ public sealed class TrayApplicationContext : ApplicationContext
 
                 for (var attempt = 0; attempt < 10 && ManagedService.FindListeningProcesses(ui.Config.Port).Count > 0; attempt++)
                 {
-                    Thread.Sleep(100);
+                    await Task.Delay(100);
                 }
 
                 if (killFailed || ManagedService.FindListeningProcesses(ui.Config.Port).Count > 0)
@@ -230,15 +260,29 @@ public sealed class TrayApplicationContext : ApplicationContext
                     ui.Icon.ShowBalloonTip(2500, ServiceName(ui.Profile),
                         Strings.Get("Balloon.KillFailed"), ToolTipIcon.Warning);
                 }
-                break;
+                else
+                {
+                    // A failed or interrupted startup can still hold a process reference.
+                    // Clear it so killing an external server cannot leave a stale Error state.
+                    try
+                    {
+                        await ui.Service.StopAsync();
+                    }
+                    catch
+                    {
+                        // The external process has already been handled; the next poll will show its state.
+                    }
+                }
+                return killFailed ? null : ExternalServiceAction.Kill;
 
             case ExternalServiceAction.StartNew:
                 ui.Config.Port = dialog.NewPort;
                 ui.PortItem.Text = string.Format(Strings.Get("Menu.Port"), ui.Config.Port);
                 ConfigStore.Save(_config);
-                RunTask(ui.Service.StartAsync);
-                break;
+                return ExternalServiceAction.StartNew;
         }
+
+        return null;
     }
 
     private void OnStatusChanged(ServiceProfile profile, ServiceConfig config, ServiceStatus status)
@@ -379,6 +423,26 @@ public sealed class TrayApplicationContext : ApplicationContext
         }
     }
 
+    private async void BeginExit()
+    {
+        if (_exitStarted || _disposed)
+            return;
+        _exitStarted = true;
+
+        foreach (var ui in _services)
+        {
+            ui.Menu.Enabled = false;
+            ui.Icon.ShowBalloonTip(1000, ServiceName(ui.Profile), Strings.Get("Dialog.Exit.Starting"), ToolTipIcon.Info);
+        }
+
+        var tasks = _services
+            .Select(ui => (ServiceName(ui.Profile), (Func<Task>)ui.Service.StopAsync))
+            .ToArray();
+        using var dialog = new ExitProgressDialog(tasks);
+        await dialog.RunAsync();
+        ExitThread();
+    }
+
     private static string ServiceName(ServiceProfile profile)
     {
         return profile.Key switch
@@ -472,13 +536,14 @@ public sealed class TrayApplicationContext : ApplicationContext
 
             foreach (var ui in _services)
             {
-                ui.Icon.Visible = false;
-                ui.Icon.Dispose();
+                ui.Service.Dispose();
             }
 
             foreach (var ui in _services)
             {
-                ui.Service.Dispose();
+                ui.Icon.Visible = false;
+                ui.Icon.Dispose();
+                ui.Menu.Dispose();
             }
 
             _singleInstance.ReleaseMutex();
