@@ -1,0 +1,49 @@
+ExitProgressDialog.cs
+  s_a58aadc228b4e6::t_ef853339e6bf1f 1-8,10-90,92-97,101-113
+  s_a58aadc228b4e6::t_2d9f69ec2fa499 9,91,98-100
+ManagedService.cs
+  s_a58aadc228b4e6::t_8de78b2df9305b 15,167-173,176,185,215,240-247,251-278,280-287
+  s_a58aadc228b4e6::t_b562222d38ac88 29,288,309-310,366,439-440,466,510-517,585-606
+  s_a58aadc228b4e6::t_822d457f5596cb 187,216-217,229
+  s_a58aadc228b4e6::t_fefe0be10e60e5 174-175,177-184,186,190
+  s_a58aadc228b4e6::t_41c87544797e42 487-491,493-503
+  s_a58aadc228b4e6::t_ef853339e6bf1f 478-486,492,504-505,507,509
+  s_a58aadc228b4e6::t_d31e630078edef 19-22,248-250,279
+  s_a58aadc228b4e6::t_988d70ec6e2e6d 523-525
+  s_a58aadc228b4e6::t_578e7f2f8360bc 506,508
+  s_a58aadc228b4e6::t_c53ebbc657701f 289
+  s_a58aadc228b4e6::t_376a12b9af2075 607
+Strings.cs
+  s_a58aadc228b4e6::t_2d9f69ec2fa499 71,135
+  s_a58aadc228b4e6::t_ef853339e6bf1f 62-70,72,126-134
+  s_a58aadc228b4e6::t_b5ea6f9ade493c 136
+TrayApplicationContext.cs
+  s_a58aadc228b4e6::t_ef853339e6bf1f 34,220,426-445,539,544-546
+  s_a58aadc228b4e6::t_264366ee8edfa5 255,263-274
+  s_a58aadc228b4e6::t_d31e630078edef 190-191,193,210-212
+  s_a58aadc228b4e6::t_f3d910c0d1767e 66,68,115,130-133,144,185-189,192,194-209,221,242,244,276,282,284-285
+  s_a58aadc228b4e6::t_578e7f2f8360bc 84
+  s_a58aadc228b4e6::t_aedbf05a89ebb2 227-230,232-234
+  s_a58aadc228b4e6::t_6a4c2f26247fa8 275
+tests/service-tray-ng.Tests/ManagedServiceLifecycleTests.cs
+  s_a58aadc228b4e6::t_41baee9bd8aee1 1,123-173
+  s_a58aadc228b4e6::t_50642942014153 174
+service-tray-ng.csproj
+  s_a58aadc228b4e6::t_075b670512d8eb 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "781bbb187515a4a8df8488bfad46f0b80fdebf8e",
+  "prompts": {},
+  "sessions": {
+    "s_a58aadc228b4e6": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_febefd286ffek6iTa0yZVcIgTK",
+        "model": "unknown"
+      },
+      "human_author": "zt11822 <zt11822@eminxing.com>"
+    }
+  }
+}
