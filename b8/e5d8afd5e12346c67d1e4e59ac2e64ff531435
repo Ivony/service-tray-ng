@@ -1,0 +1,47 @@
+tests/service-tray-ng.Tests/ManagedServiceLifecycleTests.cs
+  s_2d1db79037153d::t_951258915b767d 124-170,172-178,187-192,194-199,202-203,205,209,216-217,219-220,222,224-230,239-244,246-251,255-256,258,262,266,268-269
+  s_2d1db79037153d::t_a174a64741a3e7 171
+  s_2d1db79037153d::t_2f49ef411a1faf 179-181,184-186
+  s_2d1db79037153d::t_080c48a71eea40 193
+  s_2d1db79037153d::t_10e942eb737f76 200-201
+  s_2d1db79037153d::t_ec24d302333fc4 204
+  s_2d1db79037153d::t_d1fc1fdcf5836d 206-208
+  s_2d1db79037153d::t_73d62dec6792ed 210-215
+  s_2d1db79037153d::t_5c195de566ea22 218
+  s_2d1db79037153d::t_ca8ba715c4305f 221
+  s_2d1db79037153d::t_a6803b809321af 223
+  s_2d1db79037153d::t_9aa5676359280f 231-233,236-238
+  s_2d1db79037153d::t_5f430c51e0c8b7 245
+  s_2d1db79037153d::t_5d82782f849a01 252-254
+  s_2d1db79037153d::t_c50d131faa333b 257
+  s_2d1db79037153d::t_ca692e6b5a6a4e 259-261
+  s_2d1db79037153d::t_912b93ab4204d8 263-265
+  s_2d1db79037153d::t_32cf604e107b95 267
+  s_2d1db79037153d::t_8e3bcc460cc6d5 270
+TrayApplicationContext.cs
+  s_2d1db79037153d::t_61ce6f1f4f7d7f 388-397
+  s_2d1db79037153d::t_951258915b767d 359-364,387,403
+  s_2d1db79037153d::t_9cc8eca2a6cc29 386
+  s_2d1db79037153d::t_630edac821a0c1 398-402
+  s_2d1db79037153d::t_a720f6bb6746ba 404
+ManagedService.cs
+  s_2d1db79037153d::t_2dda92fe38fd1e 567-571
+  s_2d1db79037153d::t_951258915b767d 559-566,572-576,583-587
+  s_2d1db79037153d::t_2d5dc9fa45b9a9 577-582
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b8e5d8afd5e12346c67d1e4e59ac2e64ff531435",
+  "prompts": {},
+  "sessions": {
+    "s_2d1db79037153d": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fe345f7f9ffeHKYfZ2CXytFZQP",
+        "model": "unknown"
+      },
+      "human_author": "zt11822 <zt11822@eminxing.com>"
+    }
+  }
+}
