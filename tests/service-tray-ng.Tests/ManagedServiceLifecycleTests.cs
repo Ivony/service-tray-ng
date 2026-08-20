@@ -122,6 +122,153 @@ public class ManagedServiceLifecycleTests
     }
 
     [Fact]
+    public async Task ChangePort_StopsProcessOnOldPortBeforeStartingOnNewPort()
+    {
+        var node = FindNode();
+        if (node is null)
+        {
+            Assert.True(true, "node.exe not found; skipping integration test");
+            return;
+        }
+
+        var oldPort = GetFreePort();
+        var newPort = GetFreePort();
+        var profile = new ServiceProfile
+        {
+            Key = "test-node",
+            DisplayName = "Test Node",
+            CommandNames = ["node.exe"],
+            ArgsTemplate = "-e \"require('net').createServer(s => s.end()).listen({port}, '{host}')\"",
+            DefaultPort = oldPort,
+            LogoLightResource = "x",
+            LogoDarkResource = "x",
+        };
+        var config = new ServiceConfig
+        {
+            Hostname = "127.0.0.1",
+            Port = oldPort,
+            AutoChangePort = false,
+            ExecutablePath = node,
+        };
+
+        using var service = new ManagedService(profile, config);
+        await service.StartAsync();
+        var oldPid = ManagedService.FindListeningPid(oldPort);
+        Assert.True(oldPid > 0);
+
+        await service.ChangePortAsync(newPort);
+
+        Assert.Equal(newPort, config.Port);
+        Assert.Equal(ServiceStatus.Running, service.Status);
+        Assert.True(await service.IsHealthyAsync());
+        Assert.Equal(0, ManagedService.FindListeningPid(oldPort));
+        Assert.NotEqual(oldPid, ManagedService.FindListeningPid(newPort));
+
+        await service.StopAsync();
+    }
+
+    [Fact]
+    public async Task AutoChangePort_WhenOccupied_SwitchesToNextFreePortWithoutPersistingByDefault()
+    {
+        var node = FindNode();
+        if (node is null)
+        {
+            Assert.True(true, "node.exe not found; skipping integration test");
+            return;
+        }
+
+        var port = GetFreePort();
+        var next = ManagedService.FindAvailablePort("127.0.0.1", port + 1);
+        Assert.True(next > 0, "Expected a free port above the blocked one.");
+
+        using var blocker = new TcpListener(IPAddress.Loopback, port);
+        blocker.Start();
+
+        var profile = new ServiceProfile
+        {
+            Key = "test-node",
+            DisplayName = "Test Node",
+            CommandNames = ["node.exe"],
+            ArgsTemplate = "-e \"require('net').createServer(s => s.end()).listen({port}, '{host}')\"",
+            DefaultPort = port,
+            LogoLightResource = "x",
+            LogoDarkResource = "x",
+        };
+        var config = new ServiceConfig
+        {
+            Hostname = "127.0.0.1",
+            Port = port,
+            AutoChangePort = true,
+            ExecutablePath = node,
+        };
+
+        using var service = new ManagedService(profile, config);
+        PortChangedEventArgs? changed = null;
+        service.PortChanged += (_, args) => changed = args;
+
+        await service.StartAsync();
+
+        Assert.Equal(next, config.Port);
+        Assert.NotNull(changed);
+        Assert.Equal(port, changed.OldPort);
+        Assert.Equal(next, changed.NewPort);
+        Assert.False(changed.Persist, "Auto-switched port should not persist by default.");
+        Assert.Equal(ServiceStatus.Running, service.Status);
+        Assert.True(await service.IsHealthyAsync());
+
+        await service.StopAsync();
+    }
+
+    [Fact]
+    public async Task AutoChangePort_PersistFlagFollowsRememberChangedPort()
+    {
+        var node = FindNode();
+        if (node is null)
+        {
+            Assert.True(true, "node.exe not found; skipping integration test");
+            return;
+        }
+
+        var port = GetFreePort();
+        var next = ManagedService.FindAvailablePort("127.0.0.1", port + 1);
+        Assert.True(next > 0, "Expected a free port above the blocked one.");
+
+        using var blocker = new TcpListener(IPAddress.Loopback, port);
+        blocker.Start();
+
+        var profile = new ServiceProfile
+        {
+            Key = "test-node",
+            DisplayName = "Test Node",
+            CommandNames = ["node.exe"],
+            ArgsTemplate = "-e \"require('net').createServer(s => s.end()).listen({port}, '{host}')\"",
+            DefaultPort = port,
+            LogoLightResource = "x",
+            LogoDarkResource = "x",
+        };
+        var config = new ServiceConfig
+        {
+            Hostname = "127.0.0.1",
+            Port = port,
+            AutoChangePort = true,
+            RememberChangedPort = true,
+            ExecutablePath = node,
+        };
+
+        using var service = new ManagedService(profile, config);
+        PortChangedEventArgs? changed = null;
+        service.PortChanged += (_, args) => changed = args;
+
+        await service.StartAsync();
+
+        Assert.NotNull(changed);
+        Assert.True(changed.Persist, "Auto-switched port should persist when RememberChangedPort is enabled.");
+        Assert.Equal(ServiceStatus.Running, service.Status);
+
+        await service.StopAsync();
+    }
+
+    [Fact]
     public async Task FindExternalProcesses_ScansPortsByProcessNameAndHttpResponse()
     {
         var node = FindNode();

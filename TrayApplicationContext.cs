@@ -21,6 +21,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         public required ToolStripMenuItem RestartItem { get; init; }
         public required ToolStripMenuItem PortItem { get; init; }
         public required ToolStripMenuItem AutoPortItem { get; init; }
+        public required ToolStripMenuItem RememberPortItem { get; init; }
         public required ToolStripMenuItem AutoStartItem { get; init; }
         public required ToolStripMenuItem StartOnLoginItem { get; init; }
         public required ContextMenuStrip Menu { get; init; }
@@ -60,7 +61,7 @@ public sealed class TrayApplicationContext : ApplicationContext
 
             var service = new ManagedService(profile, serviceConfig);
             service.StatusChanged += (_, status) => OnStatusChanged(profile, serviceConfig, status);
-            service.PortChanged += (_, _) => OnServicePortChanged(profile, serviceConfig);
+            service.PortChanged += (_, args) => OnServicePortChanged(profile, serviceConfig, args);
 
             var statusItem = new ToolStripMenuItem(Strings.Get("Menu.Status.Stopped"), null, (_, _) => OpenServer(profile, serviceConfig, service));
             var startItem = new ToolStripMenuItem(Strings.Get("Menu.Start"));
@@ -74,6 +75,11 @@ public sealed class TrayApplicationContext : ApplicationContext
             var autoPortItem = new ToolStripMenuItem(Strings.Get("Menu.AutoSwitchPort"), null, (_, _) => OnToggleAutoPort(serviceConfig))
             {
                 Checked = serviceConfig.AutoChangePort,
+            };
+            var rememberPortItem = new ToolStripMenuItem(Strings.Get("Menu.RememberChangedPort"), null, (_, _) => OnToggleRememberPort(serviceConfig))
+            {
+                Checked = serviceConfig.RememberChangedPort,
+                Enabled = serviceConfig.AutoChangePort,
             };
             var openLogsItem = new ToolStripMenuItem(Strings.Get("Menu.OpenLogFolder"), null, (_, _) => OpenFolder(service.LogDirectory));
             var openConfigItem = new ToolStripMenuItem(Strings.Get("Menu.OpenConfig"), null, (_, _) => OpenFolder(Path.GetDirectoryName(ConfigStore.ConfigFilePath)!));
@@ -95,6 +101,7 @@ public sealed class TrayApplicationContext : ApplicationContext
                 autoStartItem,
                 portItem,
                 autoPortItem,
+                rememberPortItem,
                 new ToolStripSeparator(),
                 openLogsItem,
                 openConfigItem,
@@ -124,6 +131,7 @@ public sealed class TrayApplicationContext : ApplicationContext
                 RestartItem = restartItem,
                 PortItem = portItem,
                 AutoPortItem = autoPortItem,
+                RememberPortItem = rememberPortItem,
                 AutoStartItem = autoStartItem,
                 StartOnLoginItem = startOnLoginItem,
                 Menu = menu,
@@ -224,11 +232,20 @@ public sealed class TrayApplicationContext : ApplicationContext
         switch (dialog.Action)
         {
             case ExternalServiceAction.Attach:
-                var selected = processes
-                    .OrderBy(process => process.Port == ui.Config.Port ? 0 : 1)
-                    .FirstOrDefault();
+                // The dialog exposes the exact instance the user picked to take over.
+                var selected = dialog.SelectedProcess;
                 if (selected is not null && ui.Service.TryAttach(selected.ProcessId))
                 {
+                    // Optionally close every other detected instance so the ports they
+                    // hold are freed. Only after a successful takeover, so a failed
+                    // attach never takes other instances down.
+                    if (dialog.CloseOthers)
+                    {
+                        foreach (var other in processes.Where(process => process.ProcessId != selected.ProcessId))
+                        {
+                            ManagedService.KillProcessTree(other.ProcessId);
+                        }
+                    }
                     ui.Config.Port = selected.Port;
                     ui.PortItem.Text = string.Format(Strings.Get("Menu.Port"), ui.Config.Port);
                     ConfigStore.Save(_config);
@@ -339,13 +356,13 @@ public sealed class TrayApplicationContext : ApplicationContext
         using var dialog = new PortDialog(config.Port);
         if (dialog.ShowDialog() != DialogResult.OK)
             return;
-        config.Port = dialog.Port;
-        _services.First(u => u.Config == config).PortItem.Text = string.Format(Strings.Get("Menu.Port"), config.Port);
+        RunTask(() => ChangePortAsync(config, service, dialog.Port));
+    }
+
+    private async Task ChangePortAsync(ServiceConfig config, ManagedService service, int port)
+    {
+        await service.ChangePortAsync(port);
         ConfigStore.Save(_config);
-        if (service.Status == ServiceStatus.Running)
-        {
-            RunTask(service.RestartAsync);
-        }
     }
 
     private void OnToggleAutoPort(ServiceConfig config)
@@ -353,13 +370,36 @@ public sealed class TrayApplicationContext : ApplicationContext
         config.AutoChangePort = !config.AutoChangePort;
         var ui = _services.First(u => u.Config == config);
         ui.AutoPortItem.Checked = config.AutoChangePort;
+        // Remembering the switched port only makes sense while auto-switching is on.
+        ui.RememberPortItem.Enabled = config.AutoChangePort;
         ConfigStore.Save(_config);
     }
 
-    private void OnServicePortChanged(ServiceProfile profile, ServiceConfig config)
+    private void OnToggleRememberPort(ServiceConfig config)
     {
-        _services.First(ui => ui.Profile == profile).PortItem.Text = string.Format(Strings.Get("Menu.Port"), config.Port);
+        config.RememberChangedPort = !config.RememberChangedPort;
+        var ui = _services.First(u => u.Config == config);
+        ui.RememberPortItem.Checked = config.RememberChangedPort;
         ConfigStore.Save(_config);
+    }
+
+    private void OnServicePortChanged(ServiceProfile profile, ServiceConfig config, PortChangedEventArgs args)
+    {
+        var ui = _services.First(ui => ui.Profile == profile);
+        void UpdatePortItem()
+        {
+            ui.PortItem.Text = string.Format(Strings.Get("Menu.Port"), config.Port);
+        }
+
+        if (ui.Menu.IsHandleCreated && ui.Menu.InvokeRequired)
+            ui.Menu.BeginInvoke(UpdatePortItem);
+        else
+            UpdatePortItem();
+
+        // An auto-switched port is only persisted when the user opted in; a manual
+        // change (ChangePortAsync) always persists.
+        if (args.Persist)
+            ConfigStore.Save(_config);
     }
 
     private static bool IsStartOnLoginEnabled()

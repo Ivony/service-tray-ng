@@ -56,7 +56,7 @@ public class ConfigStoreTests : IDisposable
         {
             Services = new Dictionary<string, ServiceConfig>
             {
-                ["dsh"] = new ServiceConfig { Port = 5555, Hostname = "0.0.0.0", AutoChangePort = false },
+                ["dsh"] = new ServiceConfig { Port = 5555, Hostname = "0.0.0.0", AutoChangePort = false, RememberChangedPort = true },
             },
         };
 
@@ -67,6 +67,17 @@ public class ConfigStoreTests : IDisposable
         Assert.Equal(5555, dsh.Port);
         Assert.Equal("0.0.0.0", dsh.Hostname);
         Assert.False(dsh.AutoChangePort);
+        Assert.True(dsh.RememberChangedPort);
+    }
+
+    [Fact]
+    public void Load_WhenRememberChangedPortMissing_DefaultsToFalse()
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(_tempFile)!);
+        File.WriteAllText(_tempFile, """{ "Services": { "dsh": { "Port": 5555 } } }""");
+
+        var loaded = ConfigStore.Load();
+        Assert.False(loaded.Services["dsh"].RememberChangedPort);
     }
 
     [Fact]

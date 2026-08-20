@@ -14,6 +14,14 @@ public enum ServiceStatus
 
 public sealed record ListeningProcess(int ProcessId, string ProcessName, string Endpoint, int Port);
 
+/// <summary>Raised when the service port changes. <see cref="Persist"/> indicates whether the change should be saved to the config file.</summary>
+public sealed class PortChangedEventArgs : EventArgs
+{
+    public required int OldPort { get; init; }
+    public required int NewPort { get; init; }
+    public bool Persist { get; init; }
+}
+
 public sealed class ManagedService : IDisposable
 {
     private static readonly HttpClient ProbeClient = new()
@@ -31,7 +39,7 @@ public sealed class ManagedService : IDisposable
     public string LogDirectory { get; }
 
     public event EventHandler<ServiceStatus>? StatusChanged;
-    public event EventHandler? PortChanged;
+    public event EventHandler<PortChangedEventArgs>? PortChanged;
 
     public ServiceConfig Config => _config;
 
@@ -383,10 +391,16 @@ public sealed class ManagedService : IDisposable
             var next = FindAvailablePort(_config.Hostname, port + 1);
             if (next > 0)
             {
+                var oldPort = _config.Port;
                 Log($"Port {_config.Port} is occupied, switching to {next}.");
                 _config.Port = next;
                 port = next;
-                PortChanged?.Invoke(this, EventArgs.Empty);
+                PortChanged?.Invoke(this, new PortChangedEventArgs
+                {
+                    OldPort = oldPort,
+                    NewPort = next,
+                    Persist = _config.RememberChangedPort,
+                });
             }
         }
 
@@ -540,6 +554,35 @@ public sealed class ManagedService : IDisposable
     {
         await StopAsync();
         await StartAsync();
+    }
+
+    public async Task ChangePortAsync(int port)
+    {
+        if (port is < 1 or > 65535)
+            throw new ArgumentOutOfRangeException(nameof(port));
+
+        if (port == _config.Port)
+            return;
+
+        bool wasRunning;
+        lock (_lock)
+        {
+            wasRunning = _process is { HasExited: false };
+        }
+        if (wasRunning)
+            await StopAsync();
+
+        var oldPort = _config.Port;
+        _config.Port = port;
+        PortChanged?.Invoke(this, new PortChangedEventArgs
+        {
+            OldPort = oldPort,
+            NewPort = port,
+            Persist = true, // manual port change is always remembered
+        });
+
+        if (wasRunning)
+            await StartAsync();
     }
 
     public async Task<bool> IsHealthyAsync()

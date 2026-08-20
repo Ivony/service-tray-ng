@@ -82,15 +82,14 @@ public class StringsTests : IDisposable
         "App.Title", "App.AlreadyRunning.Message",
         "Menu.Status.Stopped", "Menu.Status.Error", "Menu.Status.Starting", "Menu.Status.Stopping", "Menu.Status.Running",
         "Menu.Start", "Menu.Stop", "Menu.Restart", "Menu.Exit", "Menu.StartOnLogin", "Menu.StartServiceOnLaunch",
-        "Menu.Port", "Menu.AutoSwitchPort", "Menu.OpenLogFolder", "Menu.OpenConfig",
+        "Menu.Port", "Menu.AutoSwitchPort", "Menu.RememberChangedPort", "Menu.OpenLogFolder", "Menu.OpenConfig",
         "Balloon.Running", "Balloon.Stopped", "Balloon.Error", "Balloon.StateChanged", "Balloon.NotRunning",
         "Balloon.Attached", "Balloon.AttachFailed", "Balloon.KillFailed",
         "Dialog.ChangePort", "Dialog.ServerPort", "Dialog.OK", "Dialog.Cancel",
         "Dialog.ExternalProcess.Title", "Dialog.ExternalProcess.Message",
         "Dialog.ExternalProcess.Attach", "Dialog.ExternalProcess.Kill", "Dialog.ExternalProcess.StartNew",
-        "Dialog.ExternalProcess.AttachOption", "Dialog.ExternalProcess.KillOption",
-        "Dialog.ExternalProcess.StartNewOption", "Dialog.ExternalProcess.ProcessDetail",
-        "Dialog.ExternalProcess.NoProcessDetails", "Dialog.ExternalProcess.NewPort",
+        "Dialog.ExternalProcess.AttachInstance", "Dialog.ExternalProcess.CloseOthers", "Dialog.ExternalProcess.KillAllInstances",
+        "Dialog.ExternalProcess.StartNewOption", "Dialog.ExternalProcess.NewPort",
         "ServiceName.OpenCode", "ServiceName.Dsh",
     ];
 }

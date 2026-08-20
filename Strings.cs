@@ -56,6 +56,7 @@ public static class Strings
         ["Menu.StartServiceOnLaunch"] = "Start service on launch",
         ["Menu.Port"] = "Port: {0}",
         ["Menu.AutoSwitchPort"] = "Auto-switch port when occupied",
+        ["Menu.RememberChangedPort"] = "Remember the auto-switched port",
         ["Menu.OpenLogFolder"] = "Open log folder",
         ["Menu.OpenConfig"] = "Open config",
 
@@ -86,11 +87,10 @@ public static class Strings
         ["Dialog.ExternalProcess.Attach"] = "Take over existing process",
         ["Dialog.ExternalProcess.Kill"] = "Force kill all processes",
         ["Dialog.ExternalProcess.StartNew"] = "Start a new process",
-        ["Dialog.ExternalProcess.AttachOption"] = "Take over existing process\r\n{0}",
-        ["Dialog.ExternalProcess.KillOption"] = "Close all existing processes\r\n{0}",
+        ["Dialog.ExternalProcess.AttachInstance"] = "Take over {0} (PID {1}) listening on {2}",
+        ["Dialog.ExternalProcess.CloseOthers"] = "Also close the other {0} instance(s)",
+        ["Dialog.ExternalProcess.KillAllInstances"] = "Close all {0} existing processes",
         ["Dialog.ExternalProcess.StartNewOption"] = "Start a new process on another port",
-        ["Dialog.ExternalProcess.ProcessDetail"] = "  {0} (PID {1}) listening on {2}",
-        ["Dialog.ExternalProcess.NoProcessDetails"] = "  No process details available.",
         ["Dialog.ExternalProcess.NewPort"] = "New port:",
 
         ["Balloon.Attached"] = "Service taken over on {0}:{1}",
@@ -120,6 +120,7 @@ public static class Strings
         ["Menu.StartServiceOnLaunch"] = "托盘启动时运行服务",
         ["Menu.Port"] = "端口：{0}",
         ["Menu.AutoSwitchPort"] = "端口被占用时自动切换",
+        ["Menu.RememberChangedPort"] = "记住自动切换的端口",
         ["Menu.OpenLogFolder"] = "打开日志目录",
         ["Menu.OpenConfig"] = "打开配置",
 
@@ -150,11 +151,10 @@ public static class Strings
         ["Dialog.ExternalProcess.Attach"] = "接管现有进程",
         ["Dialog.ExternalProcess.Kill"] = "强行杀掉所有进程",
         ["Dialog.ExternalProcess.StartNew"] = "开启新的进程",
-        ["Dialog.ExternalProcess.AttachOption"] = "接管现有进程\r\n{0}",
-        ["Dialog.ExternalProcess.KillOption"] = "关闭所有现有进程\r\n{0}",
+        ["Dialog.ExternalProcess.AttachInstance"] = "接管 {0}（PID {1}），监听 {2}",
+        ["Dialog.ExternalProcess.CloseOthers"] = "同时关闭其他 {0} 个实例",
+        ["Dialog.ExternalProcess.KillAllInstances"] = "关闭所有现有进程（共 {0} 个）",
         ["Dialog.ExternalProcess.StartNewOption"] = "在其他端口开启新的进程",
-        ["Dialog.ExternalProcess.ProcessDetail"] = "  {0}（PID {1}），监听 {2}",
-        ["Dialog.ExternalProcess.NoProcessDetails"] = "  暂时无法获取进程详情。",
         ["Dialog.ExternalProcess.NewPort"] = "新端口：",
 
         ["Balloon.Attached"] = "已接管运行于 {0}:{1} 的服务",
@@ -184,6 +184,7 @@ public static class Strings
         ["Menu.StartServiceOnLaunch"] = "起動時にサービスを開始",
         ["Menu.Port"] = "ポート: {0}",
         ["Menu.AutoSwitchPort"] = "ポートが使用中なら自動切替",
+        ["Menu.RememberChangedPort"] = "自動切替したポートを記憶",
         ["Menu.OpenLogFolder"] = "ログフォルダを開く",
         ["Menu.OpenConfig"] = "設定を開く",
 
@@ -230,6 +231,7 @@ public static class Strings
         ["Menu.StartServiceOnLaunch"] = "실행 시 서비스 시작",
         ["Menu.Port"] = "포트: {0}",
         ["Menu.AutoSwitchPort"] = "포트 사용 중이면 자동 전환",
+        ["Menu.RememberChangedPort"] = "자동 전환된 포트 기억",
         ["Menu.OpenLogFolder"] = "로그 폴더 열기",
         ["Menu.OpenConfig"] = "설정 열기",
 
@@ -276,6 +278,7 @@ public static class Strings
         ["Menu.StartServiceOnLaunch"] = "Démarrer le service au lancement",
         ["Menu.Port"] = "Port : {0}",
         ["Menu.AutoSwitchPort"] = "Changer de port automatiquement s'il est occupé",
+        ["Menu.RememberChangedPort"] = "Mémoriser le port basculé automatiquement",
         ["Menu.OpenLogFolder"] = "Ouvrir le dossier des journaux",
         ["Menu.OpenConfig"] = "Ouvrir la configuration",
 
@@ -322,6 +325,7 @@ public static class Strings
         ["Menu.StartServiceOnLaunch"] = "Dienst beim Start ausführen",
         ["Menu.Port"] = "Port: {0}",
         ["Menu.AutoSwitchPort"] = "Port bei Belegung automatisch wechseln",
+        ["Menu.RememberChangedPort"] = "Automatisch gewechselten Port merken",
         ["Menu.OpenLogFolder"] = "Protokollordner öffnen",
         ["Menu.OpenConfig"] = "Konfiguration öffnen",
 
@@ -368,6 +372,7 @@ public static class Strings
         ["Menu.StartServiceOnLaunch"] = "Iniciar servicio al arrancar",
         ["Menu.Port"] = "Puerto: {0}",
         ["Menu.AutoSwitchPort"] = "Cambiar puerto automáticamente si está ocupado",
+        ["Menu.RememberChangedPort"] = "Recordar el puerto cambiado automáticamente",
         ["Menu.OpenLogFolder"] = "Abrir carpeta de registros",
         ["Menu.OpenConfig"] = "Abrir configuración",
 
@@ -414,6 +419,7 @@ public static class Strings
         ["Menu.StartServiceOnLaunch"] = "Avvia il servizio all'avvio",
         ["Menu.Port"] = "Porta: {0}",
         ["Menu.AutoSwitchPort"] = "Cambia porta se occupata",
+        ["Menu.RememberChangedPort"] = "Ricorda la porta cambiata automaticamente",
         ["Menu.OpenLogFolder"] = "Apri cartella log",
         ["Menu.OpenConfig"] = "Apri configurazione",
 
@@ -460,6 +466,7 @@ public static class Strings
         ["Menu.StartServiceOnLaunch"] = "Iniciar serviço ao iniciar",
         ["Menu.Port"] = "Porta: {0}",
         ["Menu.AutoSwitchPort"] = "Trocar porta se ocupada",
+        ["Menu.RememberChangedPort"] = "Lembrar da porta trocada automaticamente",
         ["Menu.OpenLogFolder"] = "Abrir pasta de logs",
         ["Menu.OpenConfig"] = "Abrir configuração",
 
@@ -506,6 +513,7 @@ public static class Strings
         ["Menu.StartServiceOnLaunch"] = "Запускать службу при старте",
         ["Menu.Port"] = "Порт: {0}",
         ["Menu.AutoSwitchPort"] = "Автоматически менять порт, если он занят",
+        ["Menu.RememberChangedPort"] = "Запоминать автоматически изменённый порт",
         ["Menu.OpenLogFolder"] = "Открыть папку журналов",
         ["Menu.OpenConfig"] = "Открыть конфигурацию",
 

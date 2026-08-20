@@ -17,7 +17,7 @@ Each service gets its own tray icon, context menu, status dot, port, config, and
 
 - One process, one tray icon per service (status-aware, adapts to dark/light mode)
 - Per-service start / stop / restart with 2s TCP health polling
-- Per-service port setting + auto-switch to the next free port when occupied
+- Per-service port setting + auto-switch to the next free port when occupied (switch is temporary unless enabled; see `RememberChangedPort`)
 - Start tray on login (registry `Run` key); per-service auto-start on launch
 - Single config file with per-service sections
 - Per-service daily logs; single-instance guard
@@ -38,6 +38,7 @@ isolated per edition (`service-tray-ng-all`, `service-tray-ng-dsh`,
       "Port": 4096,
       "AutoStartService": false,
       "AutoChangePort": true,
+      "RememberChangedPort": false,
       "WorkingDirectory": ""
     },
     "dsh": {
@@ -46,6 +47,7 @@ isolated per edition (`service-tray-ng-all`, `service-tray-ng-dsh`,
       "Port": 3080,
       "AutoStartService": false,
       "AutoChangePort": true,
+      "RememberChangedPort": false,
       "WorkingDirectory": ""
     }
   }
@@ -54,7 +56,8 @@ isolated per edition (`service-tray-ng-all`, `service-tray-ng-dsh`,
 
 - `ExecutablePath`: absolute path to the binary (`.cmd`/`.bat` supported). Empty = resolve on PATH, falling back to `npx <package>` when the profile declares one.
 - `Hostname`/`Port`: where the server binds. Defaults per profile.
-- `AutoChangePort`: when the configured port is taken, pick the next free one and remember it.
+- `AutoChangePort`: when the configured port is taken, pick the next free one.
+- `RememberChangedPort`: persist an auto-switched port to the config file. Default `false` — the switch is temporary (used for this run only, UI and health checks follow it) and the configured port is used again on the next start. Manual port changes are always saved.
 - `WorkingDirectory`: directory the server process runs in. Empty = the tray's own directory.
 - `AutoStartService`: launch this service when the tray starts.
 
