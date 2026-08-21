@@ -2,23 +2,21 @@ using System.Windows.Forms;
 
 namespace service_tray_ng;
 
-public enum ExternalServiceAction
-{
-    Attach,
-    Kill,
-    StartNew,
-}
-
 public sealed class ExternalProcessDialog : Form
 {
-    public ExternalServiceAction Action { get; private set; }
+    private readonly ExternalChoiceModel _model;
+
+    public ExternalServiceAction Action => _model.Action;
     public int NewPort { get; private set; }
 
     /// <summary>The specific instance to take over when <see cref="Action"/> is <see cref="ExternalServiceAction.Attach"/>, or null.</summary>
-    public ListeningProcess? SelectedProcess { get; private set; }
+    public ListeningProcess? SelectedProcess => _model.SelectedProcess;
 
     /// <summary>When attaching, also close every other detected instance. Only offered when several instances are running.</summary>
-    public bool CloseOthers { get; private set; }
+    public bool CloseOthers => _model.CloseOthers;
+
+    /// <summary>The instances to close for the current selection (non-empty only when attaching with <see cref="CloseOthers"/> set).</summary>
+    public IReadOnlyList<ListeningProcess> ProcessesToClose => _model.ProcessesToClose;
 
     public ExternalProcessDialog(
         string serviceName,
@@ -27,19 +25,15 @@ public sealed class ExternalProcessDialog : Form
         IReadOnlyList<ListeningProcess> processes,
         int defaultNewPort)
     {
+        _model = new ExternalChoiceModel(port, processes);
+        var sorted = _model.SortedProcesses;
+
         Text = Strings.Get("Dialog.ExternalProcess.Title");
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
         Width = 620;
-
-        // Instances matching the configured port first, then by port number, so the
-        // default selection is the least surprising one.
-        var sorted = processes
-            .OrderByDescending(process => process.Port == port)
-            .ThenBy(process => process.Port)
-            .ToArray();
 
         var message = new Label
         {
@@ -54,8 +48,8 @@ public sealed class ExternalProcessDialog : Form
 
         // One "take over" option per detected instance, so the user picks exactly
         // which instance to manage when several are running.
-        var attachOptions = new List<RadioButton>(sorted.Length);
-        for (var i = 0; i < sorted.Length; i++)
+        var attachOptions = new List<RadioButton>(sorted.Count);
+        for (var i = 0; i < sorted.Count; i++)
         {
             var process = sorted[i];
             var option = new RadioButton
@@ -72,14 +66,19 @@ public sealed class ExternalProcessDialog : Form
             y += rowHeight;
         }
 
+        if (sorted.Count > 0)
+            _model.SelectAttach((ListeningProcess)attachOptions[0].Tag!);
+        else
+            _model.SelectKill();
+
         // While taking over one instance, offer closing the remaining ones so the
         // configured port is freed up. Only meaningful (and offered) with multiple instances.
         CheckBox? closeOthers = null;
-        if (sorted.Length > 1)
+        if (_model.CanCloseOthers)
         {
             closeOthers = new CheckBox
             {
-                Text = string.Format(Strings.Get("Dialog.ExternalProcess.CloseOthers"), sorted.Length - 1),
+                Text = string.Format(Strings.Get("Dialog.ExternalProcess.CloseOthers"), sorted.Count - 1),
                 Location = new Point(44, y + 2),
                 Size = new Size(530, rowHeight - 4),
                 Enabled = true,
@@ -89,10 +88,10 @@ public sealed class ExternalProcessDialog : Form
 
         var kill = new RadioButton
         {
-            Text = string.Format(Strings.Get("Dialog.ExternalProcess.KillAllInstances"), sorted.Length),
+            Text = string.Format(Strings.Get("Dialog.ExternalProcess.KillAllInstances"), sorted.Count),
             Location = new Point(24, y),
             Size = new Size(550, rowHeight),
-            Checked = sorted.Length == 0, // fallback when nothing is listed
+            Checked = sorted.Count == 0, // fallback when nothing is listed
         };
         y += rowHeight + 8;
 
@@ -141,16 +140,23 @@ public sealed class ExternalProcessDialog : Form
         {
             option.CheckedChanged += (_, _) =>
             {
-                if (option.Checked && closeOthers is not null)
-                    closeOthers.Enabled = true;
+                if (option.Checked)
+                {
+                    _model.SelectAttach((ListeningProcess)option.Tag!);
+                    if (closeOthers is not null)
+                        closeOthers.Enabled = true;
+                }
             };
         }
         if (closeOthers is not null)
         {
+            closeOthers.CheckedChanged += (_, _) => _model.SetCloseOthers(closeOthers.Checked);
+
             kill.CheckedChanged += (_, _) =>
             {
                 if (kill.Checked)
                 {
+                    _model.SelectKill();
                     closeOthers.Checked = false;
                     closeOthers.Enabled = false;
                 }
@@ -159,6 +165,7 @@ public sealed class ExternalProcessDialog : Form
             {
                 if (startNew.Checked)
                 {
+                    _model.SelectStartNew();
                     closeOthers.Checked = false;
                     closeOthers.Enabled = false;
                 }
@@ -170,6 +177,8 @@ public sealed class ExternalProcessDialog : Form
         {
             startNew.CheckedChanged += (_, _) =>
             {
+                if (startNew.Checked)
+                    _model.SelectStartNew();
                 newPort.Enabled = startNew.Checked;
                 newPortLabel.Enabled = startNew.Checked;
             };
@@ -177,25 +186,6 @@ public sealed class ExternalProcessDialog : Form
 
         ok.Click += (_, _) =>
         {
-            var checkedAttach = attachOptions.FirstOrDefault(option => option.Checked);
-            if (checkedAttach is not null)
-            {
-                Action = ExternalServiceAction.Attach;
-                SelectedProcess = (ListeningProcess)checkedAttach.Tag!;
-                CloseOthers = closeOthers?.Checked ?? false;
-            }
-            else if (kill.Checked)
-            {
-                Action = ExternalServiceAction.Kill;
-                SelectedProcess = null;
-                CloseOthers = false;
-            }
-            else
-            {
-                Action = ExternalServiceAction.StartNew;
-                SelectedProcess = null;
-                CloseOthers = false;
-            }
             NewPort = (int)newPort.Value;
         };
 

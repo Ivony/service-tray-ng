@@ -239,12 +239,9 @@ public sealed class TrayApplicationContext : ApplicationContext
                     // Optionally close every other detected instance so the ports they
                     // hold are freed. Only after a successful takeover, so a failed
                     // attach never takes other instances down.
-                    if (dialog.CloseOthers)
+                    foreach (var other in dialog.ProcessesToClose)
                     {
-                        foreach (var other in processes.Where(process => process.ProcessId != selected.ProcessId))
-                        {
-                            ManagedService.KillProcessTree(other.ProcessId);
-                        }
+                        ManagedService.KillProcessTree(other.ProcessId);
                     }
                     ui.Config.Port = selected.Port;
                     ui.PortItem.Text = string.Format(Strings.Get("Menu.Port"), ui.Config.Port);
